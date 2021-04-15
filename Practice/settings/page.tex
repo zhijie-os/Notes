@@ -1,0 +1,12 @@
+\usepackage[top=2cm,bottom=1.8cm,left=2.5cm, right=2.5cm]{geometry} % page margins
+\parindent=0.5cm  % space between new text block
+%\sloppy      % unfinished word doesnt not use hyphen (best effort)
+%\hyphenation{} % use hyphenation of tolerance parameters, like URL
+\usepackage{fancyhdr} % needed for head and foot options
+
+\pagestyle{fancy}
+\fancyhf{} % clear all header and footers
+\fancyhead[OR]{\leftmark} % put chapter name on odd pages' header
+\fancyhead[ER]{\rightmark} % put section name on even pages' header
+\renewcommand{\footrulewidth}{1pt} % put a line above footer in every page
+\cfoot{\thepage}

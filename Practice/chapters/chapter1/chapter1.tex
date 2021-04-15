@@ -1,0 +1,79 @@
+\chapter{Math}
+
+\section{label equation and refer to it}
+
+\begin{equation}
+    x+y=z
+    \label{math_addition}
+\end{equation}
+
+% alignment of math equations
+\begin{align}
+    \label{math_align}
+    f(x) &= a+b\\
+         &= c   
+\end{align}
+
+% array only has one label
+% array can only be used in mathematic mode
+\begin{equation} % ccc means three cols and everything in the center
+    \begin{array}{ccc}
+        a   &b   &c \\ % & to indicate a token
+        d
+    \end{array}
+\end{equation}
+
+% a matrix is like an array with parenthesis.
+\begin{equation}
+    \left(
+        \begin{array}{cccc}
+            1 & 2 & 3\\
+            4 & 5 & 6\\
+            7 & 8 & 9
+        \end{array}
+    \right)
+\end{equation}
+
+% alternative matrix creation
+% pmatrix <=> parenthesis matrix
+% bmatrix <=> bracket matrix
+\begin{equation}
+    \label{math_parenthesis_matrx}
+    \begin{pmatrix}
+        1 & 2\\
+        3 & 4
+    \end{pmatrix}
+\end{equation}
+
+% number of columns is auto detected, default centered
+\begin{equation}
+    \begin{bmatrix}
+        1 & 2\\
+        3 & 4
+    \end{bmatrix}
+\end{equation}\label{math_bracket_matrix}
+
+% use different math fonts: package amssymb is needed 
+\begin{equation}
+    \begin{array}{ccc}
+        \mathbb{R} &\mathbb{Z} &\mathbb{N}\\
+        \mathcal{R} &\mathcal{Z} &\mathcal{N}
+    \end{array}
+\end{equation}
+
+% some math symbol
+\begin{equation}
+    \sum; \int; \iiint; \nabla; \cdot; \times; \otimes
+\end{equation}
+
+
+The first equation is \eqref{math_addition}.
+
+
+The align looks like \eqref{math_align}.
+
+
+The parenthesis matrix: \eqref{math_parenthesis_matrx}
+
+The bracket matrix: \eqref{math_bracket_matrix}
+

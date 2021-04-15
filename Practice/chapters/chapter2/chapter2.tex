@@ -1,0 +1,28 @@
+\chapter{Hyperlinks and references} 
+%\label{chapter_label}
+
+\section{what}
+    What is going on?\\
+% autoref can reference to any label
+This is auto reference:\autoref{math_addition}\\
+% hyperref <label name> <the content show in pdf>
+This reference gives a name to the reference: \hyperref[math_addition]{Addition In Latex}\\
+
+This is equation reference:\eqref{math_addition}\\
+
+% only reference name, without hyperlink
+This only references the name:\ref*{math_addition}\\
+
+
+% need use http: to indicate a DNS
+% plain url 
+\url{http:www.github.com/zhijie-os}
+% rename url 
+\href{http:www.github.com/zhijie-os}{Zhijie's Github}
+
+% send email to: mailto : open up default email program
+\href{mailto:zhijiexiacs@gmail.com}{zhijiexiacs@gmail.com}
+
+% run : open file in file system, this is relative to the main
+\href{run:chapters/chapter2/demo.mkv}{Video}
+
