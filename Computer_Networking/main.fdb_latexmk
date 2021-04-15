@@ -1,11 +1,11 @@
 # Fdb version 3
-["xdvipdfmx"] 1618492876 "/home/zhijie/Notes/Computer_Networking/main.xdv" "/home/zhijie/Notes/Computer_Networking/main.pdf" "/home/zhijie/Notes/Computer_Networking/main" 1618492876
-  "/home/zhijie/Notes/Computer_Networking/main.xdv" 1618492875 130152 0145fb1bc2e127d5c67f9fd1ea47a3a7 "xelatex"
+["xdvipdfmx"] 1618508523 "/home/zhijie/Notes/Computer_Networking/main.xdv" "/home/zhijie/Notes/Computer_Networking/main.pdf" "/home/zhijie/Notes/Computer_Networking/main" 1618508523
+  "/home/zhijie/Notes/Computer_Networking/main.xdv" 1618508523 237112 4d4e93b5c161ab38e87e3660c86bf623 "xelatex"
   (generated)
   "/home/zhijie/Notes/Computer_Networking/main.pdf"
-["xelatex"] 1618492875 "/home/zhijie/Notes/Computer_Networking/main.tex" "/home/zhijie/Notes/Computer_Networking/main.xdv" "main" 1618492876
+["xelatex"] 1618508522 "/home/zhijie/Notes/Computer_Networking/main.tex" "/home/zhijie/Notes/Computer_Networking/main.xdv" "main" 1618508523
   "/etc/texmf/web2c/texmf.cnf" 1618329941 475 c0e671620eb5563b2130f56340a5fde8 ""
-  "/home/zhijie/Notes/Computer_Networking/main.aux" 1618492875 6312 54e98c7d0145e17fb7dd1a9b811af5b0 ""
+  "/home/zhijie/Notes/Computer_Networking/main.aux" 1618508523 9108 bc0493d0548c552c495abe1ae643e3fe ""
   "/home/zhijie/Notes/Computer_Networking/main.tex" 1618492800 205 00c499bf63638dbf2d9b2bf5bcaffe1d ""
   "/usr/share/texlive/texmf-dist/fonts/map/fontname/texfonts.map" 1577235249 3524 cb3e574dea2d1052e39280babc910dc8 ""
   "/usr/share/texlive/texmf-dist/fonts/tfm/adobe/zapfding/pzdr.tfm" 1136768653 1528 f853c4d1b4e0550255e02831fdc8496f ""
@@ -158,21 +158,24 @@
   "chapters/chapter1/StoreAndForward.png" 1618483831 41151 993cd45a1192dca48518cc4fb1d9b3fc ""
   "chapters/chapter1/TDM.png" 1618487094 17945 701b8379d95d422dbd206271506baf9c ""
   "chapters/chapter1/chapter1.tex" 1618492764 9540 bf9d0e5fa7e62bd5825ab5a3d60f7d39 ""
-  "chapters/chapter2/chapter2.tex" 1618492872 28 4230b521516e732712674dd65c6c3dec ""
+  "chapters/chapter2/HTTP_Format.png" 1618506797 27254 2a2254fb18e9b429bb2a7a5f39f507a5 ""
+  "chapters/chapter2/HTTP_Reponse_Message.png" 1618508248 27576 56a53929a744df78fe10bc43b4626dc9 ""
+  "chapters/chapter2/chapter2.tex" 1618508521 10243 fe5e82f859a85b80a705ee62619b79e7 ""
+  "chapters/chapter2/socket.png" 1618499539 56790 d338bcc4dae105c54f9e33003d3bb03e ""
   "chapters/contents.tex" 1618492874 95 4968d2d88284453c93f5756e10c42499 ""
-  "main.aux" 1618492875 6312 54e98c7d0145e17fb7dd1a9b811af5b0 "xelatex"
-  "main.out" 1618492875 1963 0614f5df4b77ec0c350dda79aae5a347 "xelatex"
+  "main.aux" 1618508523 9108 bc0493d0548c552c495abe1ae643e3fe "xelatex"
+  "main.out" 1618508523 2862 ee0a635924ccd5c873846f27c1df8300 "xelatex"
   "main.tex" 1618492800 205 00c499bf63638dbf2d9b2bf5bcaffe1d ""
-  "main.toc" 1618492875 2685 e2607a34472de03aee605ee6cc42b538 "xelatex"
-  "settings/macros.tex" 1618482818 327 576a370676f9f060c33573e77183202f ""
+  "main.toc" 1618508523 4062 623259d86ba688cffa8a11c709b58964 "xelatex"
+  "settings/macros.tex" 1618504753 370 3b1dc9e0614b420497b46ca583abf17c ""
   "settings/packages.tex" 1618482703 389 f0ac76a31008a5c21b879037d42a3913 ""
   "settings/page.tex" 1618484154 611 ae8b970461b073b9905bc146af457e7d ""
   "settings/title.tex" 1618482703 1395 f08659b85063b5e78f1eccf8bca78087 ""
   (generated)
+  "main.xdv"
+  "main.toc"
   "/home/zhijie/Notes/Computer_Networking/main.xdv"
   "main.log"
-  "main.xdv"
+  "main.aux"
   "main.out"
   "/home/zhijie/Notes/Computer_Networking/main.log"
-  "main.aux"
-  "main.toc"
