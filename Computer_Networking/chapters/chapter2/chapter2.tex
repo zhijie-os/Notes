@@ -241,11 +241,161 @@ Some common status codes and associated phrases include:
 \begin{enumerate}
     \item \tbi{200 OK}: Request succeeded and the information is returned in the response.
     \item \tbi{301 Moved Permanently}: Requested object has been permanently moved;
-    the new URL is specified in Location: header of the response message. The
-    client software will automatically retrieve the new URL.
+          the new URL is specified in Location: header of the response message. The
+          client software will automatically retrieve the new URL.
     \item \tbi{400 Bad Request}: This is a generic error code indicating that the request
-could not be understood by the server.
+          could not be understood by the server.
     \item \tbi{404 Not Found}: The requested document does not exist on this server.
     \item \tbi{505 HTTP Version Not Supported}: The requested HTTP protocol
-    version is not supported by the server.
+          version is not supported by the server.
 \end{enumerate}
+
+
+\subsection{Cookies}
+HTTP use cookies to identify users.
+
+\begin{figure}[!h]
+    \centering
+    \includegraphics[width=0.9\textwidth]{chapters/chapter2/UserState_cookie.png}
+    \caption{Use cookie to identify users}
+    \label{c2_cookies}
+\end{figure}
+
+\subsubsection{Major cookies components}
+\begin{enumerate}
+    \item A cookie header line in the HTTP response message.
+    \item A cookie header line in the HTTP request message.
+    \item A cookie file kept on the user’s end system and managed by the
+          user’s browser.
+    \item A back-end database at the Web site.
+\end{enumerate}
+
+Flows of using cookies:
+\begin{enumerate}
+    \item Alice send HTTP request message without a cookie header line.
+    \item The server generates a new cookies number and stores it to the database.Then repsonses with Set-cookie: header \tbi{Set-cookie: 1678}.
+    \item When Alice receives the response message, her browsers appends a line to the special cookie file that it manages.
+    \item In the following requests, Alice's browser will include the cookie for the server in the header lines. Like \tbi{Cookie: 1678}.
+    \item The server will identify Alice with the cookie it receives in the header liens.
+\end{enumerate}
+
+
+
+\subsection{Web Caching}
+A \tbi{Web cache}—also called a \tbi{proxy server}—is a network entity that satisfies HTTP
+requests on the behalf of an origin Web server. \underlineit{The Web cache is both a client and a server}.
+
+\begin{figure}
+    \centering
+    \includegraphics[width=0.6\textwidth]{chapters/chapter2/web_cache.png}
+    \caption{Web Caching}
+    \label{c2_web_caching}
+\end{figure}
+
+The web caching process:
+\begin{enumerate}
+    \item The browser establishes TCP connection to the Web cache and sends HTTP request for the object to the Web cache
+    \item The Web cache checks to see if it has a copy of the object stored locally. If it
+          does, the Web cache returns the object within an HTTP response message to
+          the client browser.
+    \item If the Web cache does not have a copy of the object, it sends HTTP request for the object to the origin server.
+    \item The web cache receives the object from the origin server with HTTP response, it stores a copy of the object and sends back to the browser.
+\end{enumerate}
+
+Typically a Web cache is purchased and installed by an ISP. For example, a uni-
+versity might install a cache on its campus network and configure all of the campus
+browsers to point to the cache.Or a major residential ISP (such as AOL) might
+install one or more caches in its network and preconfigure its shipped browsers to
+point to the installed caches.\\
+
+\subsubsection{Advantage of using a web cache/proxy server}
+
+\begin{enumerate}
+    \item A Web
+          cache can substantially reduce the response time for a client request, particularly if the
+          bottleneck bandwidth between the client and the origin server is much less than the bot-
+          tleneck bandwidth between the client and the cache.
+    \item Web caches can substantially reduce traffic on an institution’s access link to the Internet. By reducing traffic, the institution does not have to upgrade bandwidth as quickly, thereby
+          reducing costs.
+    \item Web caches can substantially reduce Web traffic in the Internet as a whole, thereby improving performance for all applications.
+\end{enumerate}
+
+
+\insertImage{width=0.4\textwidth}{chapters/chapter2/Cache_example.png}{Adding a cache to the institutional network}{c2_cache_example}
+
+Suppose that the average object size is 1Mbits and that the average request rate from instution's
+browsers to origin server is 15 requests per second.\\
+The traffic intensity on the LAN is:
+\begin{equation}
+    (15 requests/sec) \cdot (1 Mbits/request) / (100Mps) = 0.15
+    \label{c2_lan_traffic_intensity}
+\end{equation}
+
+The traffic intensity on the access link(from the Internet router to institution
+router) is:
+\begin{equation}
+    (15 requests/sec) \cdot (1 Mbits/request) / (15Mps) = 1
+    \label{c2_accessLink_traffic_intensity}
+\end{equation}
+Which is really bad and goes to infinite.
+
+However, when we use the Web cache in the \autoref{c2_cache_example} when the hit rate is 0.4,
+we will a traffic intensity on the access link:
+\begin{equation}
+    (15*0.6 requests/sec) \cdot (1 Mbits/request) / (15Mps) =0.6
+\end{equation}
+Which is much better.
+
+\subsubsection{The conditional \textbf{GET}}
+
+
+The Web cache uses \tbi{conditional GET} to check whether the copy of the object is up to date.
+A HTTP request message is \tbi{conditional GET} if
+\begin{enumerate}
+    \item The request message uses the \tbi{GET} method.
+    \item The request message includes an \tbi{If-Modified-Since:} header line.
+\end{enumerate}
+
+First, on the behalf of a requesting browser, a proxy cache sends a request message
+to a Web server:
+
+\begin{center}
+    GET /fruit/banana HTTP/1.1\\
+    HOST: www.walmart.ca
+\end{center}
+
+Second, the Web server receives the HTTP response from origin server:
+
+\begin{center}
+    HTTP/1.1 200 OK\\
+    Date: Sat, 8 Oct 2011 15:39:32\\
+    Server: Apache/1.3.0 (UNIX)\\
+    Last-Modified: Wed, 7 Sep 2011 09:23:24\\
+    Content-Type: image/gif\\
+    (data data data data data ...)
+\end{center}
+
+The Web cache would forward the object to the requesting browser and store a copy of it.
+When the next time someone sends a same request message, the Web cache would send a \tbi{conditional
+    GET}:
+
+\begin{center}
+    GET /fruit/banana HTTP/1.1\\
+    HOST: www.walmart.ca\\
+    If-modified-since: Wed, 7 Sep 2011 09:23:24
+\end{center}
+
+Suppose the object is not updated after the last \tbi{GET}, the origin server would response:
+
+\begin{center}
+    HTTP/1.1 304 Not Modified\\
+    Date: Sat, 15 Oct 2011 15:39:29\\
+    Server: Apache/1.3.0 (Unix)\\
+    (empty entity body)
+\end{center}
+
+\tbi{304 Not Modified} indicates that the requested object is not modified since Wed, 7 Sep 2011 09:23:24.
+Therefore, it doesn't attach the data in the entity. The Web cache would forward the local copy of the
+object back to the browser.\\
+
+Note that an HTTP request/response message is ne
