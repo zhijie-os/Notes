@@ -7,7 +7,7 @@
 
 \subsection{Network Applicatoin Architectures}
 
-\textbfit{Application Architecture} is designed by the application developer and \textit{dictates how the application is structured} over
+\hf\textbfit{Application Architecture} is designed by the application developer and \textit{dictates how the application is structured} over
 various end systems.\\
 
 Two predominant architectural paradigms:
@@ -17,6 +17,7 @@ Two predominant architectural paradigms:
 \end{enumerate}
 
 \subsubsection{Client-Server}
+
 \begin{enumerate}
     \item Server: the always-on host which services requests from many other hosts.
     \item Client: the end host whic request services from the server.
@@ -62,7 +63,7 @@ The problems that P2P need to face:
 
 \subsection{Transport services available to applications}
 
-We can broadly classify the possible services along four dimensions:
+\hf We can broadly classify the possible services along four dimensions:
 \begin{enumerate}
     \item Reliable data transfer
     \item Throughput
@@ -71,10 +72,11 @@ We can broadly classify the possible services along four dimensions:
 \end{enumerate}
 
 
-
+\newpage
 
 \section{Socket}
 
+\hf
 Most applications consist of pairs of communicating processes, with the two processes in each pair sending messages to each other.\\
 \textbfit{Socket}: the interface that a process sends messages into, and receives messages from.
 
@@ -94,6 +96,7 @@ of everything on the application-layer side but only little control of the trans
 
 \subsection{Address Processes}
 
+\hf
 Similarly, in order for a process running on one host to send packets to a
 process running on another host, the receiving process needs to have an address.
 In particular:
@@ -105,8 +108,10 @@ In particular:
 Some ports are reserved by well-known applications. For example, a Web server has port number 80. A mail server process has port number 25.
 
 
-
+\newpage
 \section{The Web and HTTP}
+
+\hf
 The Web operates on demand.
 \subsection{Overiew of HTTP}
 
@@ -119,6 +124,8 @@ HTTP defines the structure of the messages and how the client and server exchang
 
 
 \subsubsection{HTTP uses TCP}
+
+\hf
 The flow:
 \begin{enumerate}
     \item The HTTP client initiates a TCP connection with the server.
@@ -131,6 +138,8 @@ Another important thing is that HTTP is \tbi{stateless protocol}.
 
 
 \subsection{HTTP with different connections}
+
+\hf
 There are two connection types for HTTP:
 \begin{enumerate}
     \item Non-persistent connection: the application sends response using existing TCP connection.
@@ -147,6 +156,8 @@ established, and persistent connection with pipelining is the default mode of th
 
 
 \subsection{HTTP Request Format}
+
+\hf
 \begin{center}
     GET /somedir/page.html HTTP/1.1\\
     Host: www.someschool.edu\\
@@ -252,6 +263,8 @@ Some common status codes and associated phrases include:
 
 
 \subsection{Cookies}
+
+\hf
 HTTP use cookies to identify users.
 
 \begin{figure}[!h]
@@ -348,7 +361,7 @@ Which is much better.
 
 \subsubsection{The conditional \textbf{GET}}
 
-
+\hf
 The Web cache uses \tbi{conditional GET} to check whether the copy of the object is up to date.
 A HTTP request message is \tbi{conditional GET} if
 \begin{enumerate}
@@ -398,4 +411,326 @@ Suppose the object is not updated after the last \tbi{GET}, the origin server wo
 Therefore, it doesn't attach the data in the entity. The Web cache would forward the local copy of the
 object back to the browser.\\
 
-Note that an HTTP request/response message is ne
+Note that an HTTP request/response message is negligible. Therefore, a \tbi{conditional GET} does
+not cause delay to forward the copy of the object to the browser if there is no modification made.
+
+
+
+\newpage
+\section{FTP: File Transfer Protocol}
+
+\insertImage{width=0.8\textwidth}{chapters/chapter2/FTP.png}{FTP}{c2_FTP}
+
+\subsection{Overview of FTP}
+
+\hf
+In \autoref{c2_FTP}:
+\begin{enumerate}
+    \item User interacts with FTP with an FTP user agent and provides the hostname of the remote host.
+    \item The process in the local host starts a TCP connection with the FTP server process.
+    \item The user provides identification and password via the established TCP connection.
+    \item The server authenticates and authorizes the user.
+    \item User can copy files from(into) the server(local).
+\end{enumerate}
+
+
+\subsection{Control connection and data connection}
+
+\hf
+The \tbi{FTP} uses \tbi{two parallel TCP connections} to transfer a file, a
+\tbi{control connection} and a \tbi{data connection}.\\
+
+The \tbi{control connection} is used for sending control information between processes -
+information such as user identification, password, commands to change remote directory,
+and commands to "put" and "get" files.\\
+
+The \tbi{data connection} is used to actually send a file.\\
+Because TCP uses a seperate control connection, FTP authenticateis said to send its control information
+\tbi{out-of-band}. HTTP sends request and response header lines into the same TCP connection that
+carries the transferred file itself. Therefore, HTTP is said to send its control information \tbi{in-band}.
+
+\insertImage{width = 0.6\textwidth}{chapters/chapter2/FTP_control_and_data.png}{Control and data connections}{c2_ftp_control_data}
+
+\begin{enumerate}
+    \item The client process starts an FTP session with a remote host.
+    \item The client process initiate a control TCP connection with the server process on \tbi{port 21}.
+    \item The client process sends user identification and password over the control connection.
+    \item The client process sends a command via control connection.
+    \item The server process receives a command for a file transfer over the control connection.
+    \item The server initiates a TCP data connection to client process on \tbi{port 20}.
+\end{enumerate}
+
+
+
+\utbi{Note that FTP sends exactly one file over the data connection and closes the data connection.}
+\utbi{If, during the same session, the user wants to transfer another file,
+    FTP opens another data connection.}
+\utbi{Thus, with FTP, the control connection remains open throughout the duration of the user session}.
+\utbi{New data connection is created for each file transferred within a session.}
+
+\begin{center}
+    \begin{enumerate}
+        \item Data connection is non-persistent.
+        \item Control connection is persistent.
+    \end{enumerate}
+\end{center}
+
+
+Also, the FTP server must maintain \tbi{state} about the user:
+\begin{enumerate}
+    \item Associate the control connection with specific user account
+    \item Keep track of the user's current directory in the remote diretory tree.
+\end{enumerate}
+
+Keeping track of this state information for each
+ongoing user session significantly constrains the total number of sessions that FTP
+can maintain simultaneously.
+
+\subsection{FTP commands and replies}
+
+
+\hf
+The commands, from client to server, and replies, from server to
+client, are sent across the control connection in 7-bit ASCII format. FTP commands
+are readable by people. Each command consists of four uppercase ASCII characters, some with optional arguments.\\
+
+Some common commands:
+\begin{enumerate}
+    \item USER username: Used to send the user identification to the server.
+    \item PASS password: Used to send the user password to the server.
+    \item LIST: Used to ask the server to send back a list of all the files in the current
+          remote directory. The list of files is sent over a (new and non-persistent) data
+          connection.
+    \item RETR filename: Used to retrieve (that is, get) a file from the current direc-
+          tory of the remote host. This command causes the remote host to initiate a data
+          connection and to send the requested file over the data connection.
+    \item STOR filename: Used to store (that is, put) a file into the current directory
+          of the remote host.
+\end{enumerate}
+
+Each command is followed by a reply, sent from server to client.\\
+
+Some common replies:
+\begin{enumerate}
+    \item 331 Username OK, password required
+    \item 125 Data connection already open; transfer starting
+    \item 425 Can't open data connection
+    \item Error writing file
+\end{enumerate}
+
+
+\newpage
+
+\section{Electronic Mail in the Internet}
+
+\hf
+\insertImage{width=0.8\textwidth}{chapters/chapter2/email_system}{High-level view of email system}{c2_email}
+
+Three major components of in \autoref{c2_email}:
+\begin{enumerate}
+    \item User agents
+    \item Mail servers
+    \item SMTP: Simple Mail Transfer Protocol
+\end{enumerate}
+
+Sender's view:
+\begin{enumerate}
+    \item User agent allows the sender to compose the message.
+    \item The user agent sends the message to the email server.
+    \item The message is placed in the mail server's outgoing message queue.
+    \item The recipent retrieves the message from his/her mailbox in the mail server.
+\end{enumerate}
+
+Mail servers form the core of the e-mail infrastructure. Each recipent has
+a \tbi{maibox} located in one of the mail servers. The mailbox manages and maintains
+the messages that have been sent to the recipent.\\
+
+The typical message's journey:
+\begin{enumerate}
+    \item Sender's user agent.
+    \item Sender's mail server.
+    \item Recipent's mail server.
+    \item Recipent's mailbox.
+\end{enumerate}
+
+The sender mail server must also deal with failures in the recipent mail
+box: If the sender server can not delivery mail to the recipent server,
+sender server holds the message in a message
+queue and attempts to transfer the message later.
+
+
+\subsection{SMTP: Simple Mail Tranfer Protocol}
+
+\hf
+SMTP uses TCP to transfer mail \tbi{from the sender's mail server to the
+    recipent's mail server}.\\
+
+When a mail server sends mail to other mail servers, it acts as an SMTP
+client. When a mail server receives mail from other mail servers, it acts as
+an SMTP server.\\
+
+SMTP restricts the body of all mail messages to simple 7-bit ASCII.
+
+\insertImage{width=0.8\textwidth}{chapters/chapter2/alice_and_bob.png}{Alice sends a message to Bob}{c2_alice_bob_smtp}
+
+When Alice sends Bob an ASCII message:
+\begin{enumerate}
+    \item Alice invokes her user agent for e-mail, provides Bob’s e-mail address (for
+          example, bob@someschool.edu), composes a message, and instructs the
+          user agent to send the message.
+    \item Alice’s user agent sends the message to her mail server, where it is placed in a
+          message queue.
+    \item The client side of SMTP, running on Alice’s mail server, sees the message in
+          the message queue. It opens a TCP connection to an SMTP server, running on
+          Bob’s mail server.
+    \item After some initial SMTP handshaking, the SMTP client sends Alice’s message
+          into the TCP connection.
+    \item At Bob’s mail server, the server side of SMTP receives the message. Bob’s
+          mail server then places the message in Bob’s mailbox.
+    \item Bob invokes his user agent to read the message at his convenience.
+\end{enumerate}
+
+\subsubsection{Detailed SMTP}
+
+\hf
+SMTP does not use intermediate email servers for sending email. SMTP establishes a connection
+to port 25 at the server SMTP. Once the connection is established, the server and
+client perform some application layer-handshaking. SMTP client indicates the e-mail
+address of the sender and the e-mail address of the recipent. Once the handshaking is
+complete, the client sends the message and repeats if there are more messages to send
+to the same server.\\
+
+Example:
+\begin{enumerate}
+    \item S: 220 hamburger.edu
+    \item C: HELO crepes.fr
+    \item S: 250 Hello crepes.fr, pleased to meet you
+    \item C: MAIL FROM: <alice@crepes.fr>
+    \item S: 250 alice@crepes.fr ... Sender ok
+    \item C: RCPT TO: <bob@hamburger.edu>
+    \item S: 250 bob@hamburger.edu ... Recipient ok
+    \item C: DATA
+    \item S: 354 Enter mail, end with “.” on a line by itself
+    \item C: Do you like ketchup?
+    \item C: How about pickles?
+    \item C: .
+    \item S: 250 Message accepted for delivery
+    \item C: QUIT
+    \item S: 221 hamburger.edu closing connection
+\end{enumerate}
+
+\subsubsection{Comparison with HTTP}
+
+\hf Common: Both persistent HTTP and SMTP use persistent connections. \\
+
+Difference:
+\begin{enumerate}
+    \item The HTTP is maily a\tbi{pull protocol}; SMTP is primarily a \tbi{push protocol}.
+    \item The message has to be encoded into 7-bit ASCII while using SMTP; HTTP doesn't impose this restriction.
+    \item HTTP encapsulates each object in its own HTTP response message; Internet mail places all of the message's objects into one message.
+\end{enumerate}
+
+
+\subsubsection{Mail message format}
+
+\hf
+A typical message header looks like this:
+\begin{center}
+    From: alice@crepes.fr\\
+    To: bob@hamburger.edu\\
+    Subject: Searching for the meaning of life.
+\end{center}
+
+\subsubsection{Mail access protocol}
+
+\hf
+Recall that a mail server manages mailboxes and runs the
+client and server sides of SMTP. If Bob's mail server were to reside
+on his local PC, then Bob's PC would have to remain always on, and connected
+to the Internet. Instead, a typical user runs a user agent on the local PC but accesses
+its mailbox stored on an always-on shared mail server.This mail server is shared
+with other users and is typically maintained by the user’s ISP.\\
+
+How can Bob retrieve his email from the mailbox?
+\insertImage{width=0.8\textwidth}{chapters/chapter2/Retrieve_email.png}{Retrieve mail from mailbox}{c2_retrieve_from_mailbox}
+
+Protocols like :\tbi{POP3} (Post Office Protocol version 3.0), \tbi{IMAP} (Internet Mail
+Access Protocol), and \tbi{HTTP} are used to pull mail from mail server to the recipent's 
+agent.
+
+\subsubsection{POP3}
+
+\hf POP3 is extremly simple mail access protocol, and it is short and readable. Because the protocol is so simple, its functionality is
+rather limited.\\
+
+POP3 begins when the user agent opens a TCP connection to mail server on \tbi{port 110}.With the TCP connection estab-
+lished, POP3 progresses through three phases: authorization, transaction, and update.\\
+
+During the first phase, authorization, the user agent sends a username and a password
+(in the clear) to authenticate the user.\\
+
+
+During the second phase, transaction, the user
+agent retrieves messages; also during this phase, the user agent can mark messages
+for deletion, remove deletion marks, and obtain mail statistics.\\
+
+The third phase,
+update, occurs after the client has issued the quit command, ending the POP3
+session; at this time, the mail server deletes the messages that were marked for
+deletion.\\
+
+In a POP3 transaction, the user agent issues commands, and the server responds
+to each command with a reply. There are two possible responses: \tbi{+OK} (sometimes
+followed by server-to-client data), used by the server to indicate that the previous
+command was fine; and \tbi{-ERR}, used by the server to indicate that something was
+wrong with the previous command.\\
+
+The sequence of commands issued by a POP3 user agent depends on which
+of these two modes the user agent is operating in. In the download-and-delete mode,
+the user agent will issue the list, retr, and dele commands.\\
+
+Transaction phrase example:
+\begin{enumerate}
+    \item C: list
+    \item S: 1 498
+    \item S: 2 912
+    \item S: .
+    \item C: retr 1
+    \item S: (blah blah \dots
+    \item S: \dots \dots \dots
+    \item S: \dots \dots \dots blah)
+    \item S: .
+    \item C: dele 1
+    \item C: retr 2
+    \item S: (blah blah \dots
+    \item S: \dots \dots \dots
+    \item S: \dots \dots \dots blah)
+    \item S: .
+    \item C: dele 2
+    \item C: quit
+    \item S: +OK POP3 server signing off
+\end{enumerate}
+
+\subsection{IMAP: Internet Mail Access Protocol}
+
+\hf
+The POP3 doesn't provide any means of a user to create remote folders and assign 
+messages to folders. => IMAP is introduced to solve this problem, but it is significantly
+more complex.\\
+
+An IMAP server will associate each message with a folder; when a message first
+arrives at the server, it is associated with the recipient’s INBOX folder. The recipient
+can then move the message into a new, user-created folder, read the message, delete
+the message, and so on.\\
+
+Another important feature of IMAP is that it has commands that permit a user
+agent to obtain components of messages. For example, a user agent can obtain just
+the message header of a message or just one part of a multipart MIME message.
+This feature is useful when there is a low-bandwidth connection between the user agent and its mail server.
+
+
+\subsection{Web-Based E-mail}
+
+\hf
+Hotmail introduced Web-based access in the mid 1990s.With this service, the user agent is an ordinary Web browser,
+and the user communicates with its remote mailbox via HTTP.
