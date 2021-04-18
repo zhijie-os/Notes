@@ -655,7 +655,7 @@ How can Bob retrieve his email from the mailbox?
 \insertImage{width=0.8\textwidth}{chapters/chapter2/Retrieve_email.png}{Retrieve mail from mailbox}{c2_retrieve_from_mailbox}
 
 Protocols like :\tbi{POP3} (Post Office Protocol version 3.0), \tbi{IMAP} (Internet Mail
-Access Protocol), and \tbi{HTTP} are used to pull mail from mail server to the recipent's 
+Access Protocol), and \tbi{HTTP} are used to pull mail from mail server to the recipent's
 agent.
 
 \subsubsection{POP3}
@@ -714,7 +714,7 @@ Transaction phrase example:
 \subsection{IMAP: Internet Mail Access Protocol}
 
 \hf
-The POP3 doesn't provide any means of a user to create remote folders and assign 
+The POP3 doesn't provide any means of a user to create remote folders and assign
 messages to folders. => IMAP is introduced to solve this problem, but it is significantly
 more complex.\\
 
@@ -734,3 +734,218 @@ This feature is useful when there is a low-bandwidth connection between the user
 \hf
 Hotmail introduced Web-based access in the mid 1990s.With this service, the user agent is an ordinary Web browser,
 and the user communicates with its remote mailbox via HTTP.
+
+
+\newpage
+\section{DNS: Domain Name System — The Internet's Directory service}
+
+Domain name vs Host name: hostname.domain.com
+\begin{enumerate}
+    \item Hostname is the name given to the end-point(a machine).
+    \item Domain is the name given to the "network".
+\end{enumerate}
+
+\hf
+Internet hosts can be identified by different ways: by \tbi{Hostname}, such as
+www.google.com or so-called \tbi{IP address}.
+
+
+\subsection{Services Provided by DNS}
+
+\hf
+From my perspective, DNS does one thing: search up IP address by hostname.\\
+Note that \tbi{DNS uses UDP and uses port 53}.
+
+The DNS is
+\begin{enumerate}
+    \item a distributed database implemented in a hierarchy of \tbi{DNS servers}.
+    \item an application-layer protocol that allows host to query the distributed database.
+\end{enumerate}
+
+DNS is commonly employed by other application-layer protocols---including HTTP,
+SMTP, and FTP --- to translate user-supplied hostnames to IP addresses. In order for
+the user's host to be able to send an HTTP request message to the Web server www.someschool.edu, the user’s host must first obtain
+the IP address of www.someschool.edu. This is done as follows.
+
+\begin{enumerate}
+    \item The same user machine runs the client side of the DNS application.
+    \item The browser extracts the hostname, www.someschool.edu, from the URL
+          and passes the hostname to the client side of the DNS application
+    \item The DNS client sends a query containing the hostname to a DNS server.
+    \item The DNS client eventually receives a reply, which includes the IP address for
+          the hostname.
+    \item Once the browser receives the IP address from DNS, it can initiate a TCP con-
+          nection to the HTTP server process located at port 80 at that IP address.
+\end{enumerate}
+
+
+DNS adds an additional delay (sometimes substantial) - to the Internet applications
+that use it. Fortunately, the
+desired IP address is often cached in a “nearby” DNS server, which helps to reduce
+DNS network traffic as well as the average DNS delay.
+
+
+\tbi{DNS provides a few other important services:}
+
+\begin{enumerate}
+    \item Host aliasing
+    \item Mail server aliasing
+    \item Load distribution: DNS is also used to perform load distribution among replicated servers, such as replicated Web servers. When the client makes a DNS query for a name
+    mapped to a set of addresses, the server responds with the entire set of IP addresses,
+    but rotates the ordering of the addresses within each reply.
+\end{enumerate}
+
+
+\subsection{Overview of How DNS Works}
+
+In order to deal with the issue of scale, the DNS uses a large number of servers,
+organized in a hierarchy fashion and distributed around the world. No single DNS
+server has all the mappings for all of the hosts in the Internet. Instead, the mappings
+are distributed across the DNS servers.\\
+
+\insertImage{width=0.7\textwidth}{chapters/chapter2/DNS_hierarchy.png}{DNS Hierarchy}{c2_dns_hierarchy}
+
+There are three classes of DNS servers — root DNS servers, top-level domain (TLD) DNS
+servers, and authoritative DNS servers — organized in a hierarchy in \autoref{c2_dns_hierarchy}.\\
+
+When searching for www.amazon.com:
+\begin{enumerate}
+    \item The client contacts one of the root servers.
+    \item The root server returns IP addresses for TLD servers for top-level domain com.
+    \item The client contacts one of the TLD servers.
+    \item The TLD server returns  IP addresses of authoritative servers for amazon.com.
+    \item The client contacts one of the authoritative servers for amazon.com.
+    \item The authoritative server returns the IP for www.amazon.com
+\end{enumerate}
+
+
+Root DNS servers: There are 13 root DNS servers in 2012:
+\insertImage{width=0.7\textwidth}{chapters/chapter2/DNS_root_servers.png}{DNS Root Servers in 2012}{c2_dns_root_servers}
+
+Top-level domain(TLD) servers:\\
+These servers are responsible of top-level domains suck as com, org, net,
+edu, and gov.\\
+\newline
+Authoritative DNS servers:\\
+Every organization with publicly accessible hosts on the Internet must provide
+publicly accessible DNS records that map the names of those hosts to IP addresses.
+\newline
+Local DNS servers:\\
+A local DNS does not strictly belong to the hierarchy of servers but it is nevertheless
+central to the DNS architecture. When a host makes a DNS query, the query is
+sent to the local DNS server, which acts a proxy, forwarding the query into the DNS
+server hierarchy.
+
+
+\insertImage{width=0.6\textwidth}{chapters/chapter2/Interaction_of_various_DNS_servers.png}{Interaction of the various DNS servers}{c2_dns_servers_interaction}
+
+Local DNS server services as a cache.The idea behind DNS caching is very simple. In a query chain, when a
+DNS server receives a DNS reply (containing, for example, a mapping from a host-
+name to an IP address), it can cache the mapping in its local memory.\\
+\newline
+
+The example in \autoref{c2_c2_dns_servers_interaction} makes use of both \tbi{recursive queries} and 
+\tbi{iterative} queries. The query sent from cis.poly.edu to dns.poly.edu is a
+recursive query, since the query asks dns.poly.edu to obtain the mapping on its behalf. But the subsequent three queries are iterative since all of the replies are
+directly returned to dns.poly.edu. In theory, any DNS query can be iterative or
+recursive.
+
+
+\insertImage{width=0.8\textwidth}{chapters/chapter2/Recursive_queries.png}{Recursive Queries}{c2_recursive_queries}
+
+In the \autoref{c2_recursive_queries} makes use of \tbi{recursive queries}.
+
+\subsection{DNS records and messages}
+
+The DNS servers that together implement the DNS distributed database store
+resource records (RRs), including RRs that provide hostname-to-IP address map-
+pings.\\
+
+A resource record is a four-tuple that contains the following fields:
+\begin{center}
+    (Name, Value, Type, TTL)
+\end{center}
+
+\tbi{TTL} is the time to live of the resource record; it determines when
+a resource should be removed from a cache.
+
+\tbi{Type} field:
+\begin{enumerate}
+    \item If Type = A, then Name is a hostname and Value is the IP address for the hostname.Example,(relay1.bar.foo.com, 145.37.93.126, A, TTL holder).
+    \item If Type = NS, then Name is a domain and Value is the hostname of an authoritative DNS server that knows how to obtain the IP addresses for hosts in the domain. Example,(foo.com, dns.foo.com, NS, TTL).
+    \item If Type = CNAME, then Name is an alias hostname and Value is the canonical name for the hostname. Example(foo.com, relay1.bar.foo.com, CNAME, TTL).
+    \item If Type = MX, then Name is an alias hostname of a mail server and the Value is the canonical name of the mail server. Example(foo.com, mail.bar.foo.com, MX, TTL).
+\end{enumerate}
+
+\subsection{DNS messages}
+
+\insertImage{width=0.7\textwidth}{chapters/chapter2/DNS_message_format.png}{DNS message format}{c2_dns_format}
+\hf There only two kinds of DNS messages: Query and Reply. Furthermore, both
+query and reply messages have the same format, as shown in \autoref{c2_dns_format}.\\
+\begin{enumerate}
+    \item The first 12 bytes is the header section, which has a number of fields. The first field
+    is a 16-bit number that identifies the query. This identifier is copied into the reply
+    message to a query, allowing the client to match received replies with sent queries.
+    There are a number of flags in the flag field. A 1-bit query/reply flag indicates
+    whether the message is a query (0) or a reply (1). A 1-bit authoritative flag is set in a
+    reply message when a DNS server is an authoritative server for a queried name. A
+    1-bit recursion-desired flag is set when a client (host or DNS server) desires that the
+    DNS server perform recursion when it doesn’t have the record. A 1-bit recursion-
+    available field is set in a reply if the DNS server supports recursion. In the header,there are also four number-of fields. These fields indicate the number of occurrences
+    of the four types of data sections that follow the header.
+    \item The question section contains information about the query that is being made.
+    This section includes (1) a name field that contains the name that is being
+    queried, and (2) a type field that indicates the type of question being asked about
+    the name—for example, a host address associated with a name (Type A) or the
+    mail server for a name (Type MX).
+    \item In a reply from a DNS server, the answer section contains the resource records
+    for the name that was originally queried. Recall that in each resource record there
+    is the Type (for example, A, NS, CNAME, and MX), the Value, and the TTL.
+    A reply can return multiple RRs in the answer, since a hostname can have multi-
+    ple IP addresses (for example, for replicated Web servers, as discussed earlier in
+    this section).
+    \item The authority section contains records of other authoritative servers.
+    \item The additional section contains other helpful records. For example, the answer
+    field in a reply to an MX query contains a resource record providing the canoni-
+    cal hostname of a mail server. The additional section contains a Type A record
+    providing the IP address for the canonical hostname of the mail server.
+\end{enumerate}
+
+
+\newpage
+\section{Peer-to-Peer Applications}
+
+\hf With P2P architecture, there is minimal(or no) reliance on always-on infrastructure servers.
+Instead, pairs of intermittently connected hosts, called peers, communicate
+directly with other. The peers are not owned by a service provider, but are instead desktops and laptops
+controlled by users.
+
+\subsection{P2P File Distribution}
+
+\subsubsection{Scalability of P2P Architecture}
+
+\hf P2P is self-scaling because 
+The number of "servers" would increase along the time.
+
+\insertImage{width=0.6\textwidth}{chapters/chapter2/Distribution_time_forP2P.png}{Distribution time for P2P and client-server architectures}{c2_distribution_time_for_p2p}
+
+
+
+\subsubsection{BitTorrent}
+
+\hf BitTorrent is a popular P2P protocol for file distribution. In BitTor-
+rent lingo, the collection of all peers participating in the distribution of a particular
+file is called a \tbi{torrent}.Peers in a torrent download equal-size chunks of the file
+from one another, with a typical chunk size of 256 KBytes. When a peer first joins
+a torrent, it has no chunks. Over time it accumulates more and more chunks. While
+it downloads chunks it also uploads chunks to other peers. Once a peer has
+acquired the entire file, it may leave the torrent, or (altruistically) remain
+in the torrent and continue to upload chunks to other peers. Also, any peer may leave
+the torrent at any time with only a subset of chunks, and later rejoin the torrent.\\
+Each torrent has an infrastructure node called a \tbi{tracker}.When a peer joins a torrent, it registers itself with the tracker and periodically
+informs the tracker that it is still in the torrent. In this manner, the tracker keeps
+track of the peers that are participating in the torrent.\\
+
+\insertImage{width=0.7\textwidth}{chapters/chapter2/BitTorrent.png}{File distribution with BitTorrent}{c2_bitTorrent}
+
+
