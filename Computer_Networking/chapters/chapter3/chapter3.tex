@@ -1,0 +1,130 @@
+\chapter{Transport Layer}
+
+\section{Introduction and Transport-Layer Services}
+
+\hf A transport-layer protocl provides for \tbi{logical communication} between application processes running
+on different hosts. Transport-layer protocols are implemented in the end systems but not in network
+routers.\\
+
+On sending side, the transport layer converts the \tbi{message} it receives into \tbi{segments}.
+This is done by breaking the \tbi{message} into smaller chunks and adding a transport-layer header to each
+chunk to create the \tbi{segment}. Then the transport layer passes the segment to the network-layer at the sending
+end system, and sent to the destination. It is important to note that network routers act only
+on the network-layer fields of the datagram; that is, they do not examine the fields of the transport-layer
+segment encapsulated with the datagram.\\
+
+On receiving side, the network-layer extracts the transport-layer segment from the datagram and passes the 
+segment up to the transport layer. The transport layer then processes the received segment, making
+the data in the segment available to the receiving application.
+
+\subsection{Relationship Between Transport and Network Layers}
+
+Transport-layer protocol provides logical communication between processes running on different hosts.\\
+
+Network-layer protocol provides logical communication between hosts.\\
+
+The possible services can be provided by a transport-layer protocol is constrained by the possible services
+that the network-layer protocol --- the Internet Protocol. If the network-layer protocol cannot provide
+delay or bandwidth guarantees for transport-layer segments send between hosts, then the transport-layer protocol cannot provide
+delay or bandwidth guarantees for application messages sent between processes.\\
+
+Nevertheless, certain services can be offered by a transport protocol even when
+the underlying network protocol doesn’t offer the corresponding service at the net-
+work layer. For example, a transport protocol can offer reliable data transfer service even IP cannot.
+A transport protocol can use encryption even IP cannot.
+
+
+\subsection{Overiew of the Transport Layer in the Internet}
+
+\hf The Internet, and more generally TCP/IP network, makes two distinct transport-layer protocols
+available to the application layer.\\
+
+One of these protocol is \tbi{UDP}(User Datagram Protocol), which provides an unreliable, connectionless
+service to the invoking application.\\
+
+The second of these protocol is \tbi{TCP}(Transmission Control Protocol), which provides a reliable, connection-oriented service to the invoking
+application.\\
+
+The Internet's network-layer protocol is called IP(Internet Protocol), which provideslogical communication between hosts.
+The IP provides "best-effort delivery service".\\
+
+The most fundamental responsibility of UDP
+and TCP is to extend IP’s delivery service between two end systems to a delivery
+service between two processes running on the end systems.\\
+
+Minimal transport-layer services:
+\begin{enumerate}
+    \item Process-to-process data delivery:Extending host-to-host
+    delivery(IP) to process-to-process delivery by transport-layer \tbi{multiplexing} and
+    \tbi{demultiplexing}.
+    \item  Error checking: UDP and TCP also provide integrity checking by including \tbi{error-detection fields} in their segments’ headers.
+\end{enumerate}
+
+
+
+\section{Multiplexing and Demultiplexing}
+
+\hf Demultiplexing: Deliverying the data in a transport-layer segment to the correct socket.\\
+
+Multiplexing: Gathering data chunks at the source host from different sockets, encapsulating each
+data chunk with header information to create segments, and passing the segments to the network layer.\\
+
+\insertImage{width=0.8\textwidth}{chapters/chapter3/transport_layer_multiplexing_demultiplexing.png}{Transport-layer multiplexing and demultiplexing}{c3_transport_multiplexing}
+
+
+\subsection{How to achieve multiplexing and demultiplexing}
+
+\hf Transport-layer multiplexing/demultiplexing requires
+\begin{enumerate}
+    \item Source port: Unique Identifiers for sockets
+    \item Destination port: Each segment have special fields that indicate socket to which the segment is to be delivered.
+\end{enumerate}
+
+\insertImage{width=0.4\textwidth}{chapters/chapter3/Source_destination_in_segment.png}{Source and destination port-number fields in a transport-layer
+segment}{c3_source_destination_port}
+
+
+Each port number is a 16-bit number, ranging from 0 to 65535. The port numbers ranging \tbi{from 0 to 1023}
+are called \tbi{well-know port numbers} and \tbi{are reserved} for certain applications.\\
+\newline
+
+
+\subsubsection{Connectionless(UDP) Multiplexing and Demultiplexing}
+
+\hf UDP is fully identified by two-tuple consisting	of 
+\begin{enumerate}
+	\item Destination IP address
+	\item Destination port number
+\end{enumerate}
+
+\insertImage{width=0.6\textwidth}{chapters/chapter3/UDP_multiplexing.png}{Connectionless Multiplexing and Demultiplexing}{c3_connectionless_multi_demulti}
+
+UDP server processes all clients via the same socket.
+
+\subsubsection{Connection-Oriented Multiplexing and Demultiplexing}
+
+\hf TCP is identified by four-tuple consisting of
+\begin{enumerate}
+	\item Source IP address
+	\item Source port number
+	\item Destination IP address
+	\item Destination port number
+\end{enumerate}
+
+\insertImage{width=0.6\textwidth}{chapters/chapter3/TCP_demultiplexing.png}{Connection-Oriented Multiplexing and Demultiplexing}{c3_connection_oriented_multi_demulti}
+
+TCP maintains a seperate socket for every connection. Why?\\
+
+Because TCP implements reliability, it
+is easier with separate sockets. For example, when a message arrives
+at a socket, it is easy to simply see the source IP/port associated
+with that socket and send ACK. If you want to send a reply to a UDP
+message, you need to extract the source IP and port from the UDP
+header for every message.\\
+
+
+\section{Connectionless Transport: UDP}
+
+\hf Basically, UDP pass application messages directly to the network layer after providing a multiplexing/demultiplexing service and some light error checking. UDP does just about as little as a transport protocol can do.
+
+

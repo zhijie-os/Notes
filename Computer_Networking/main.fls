@@ -55,6 +55,8 @@ INPUT /usr/share/texlive/texmf-dist/tex/latex/tools/longtable.sty
 INPUT /usr/share/texlive/texmf-dist/tex/latex/tools/longtable.sty
 INPUT /usr/share/texlive/texmf-dist/tex/latex/tools/enumerate.sty
 INPUT /usr/share/texlive/texmf-dist/tex/latex/tools/enumerate.sty
+INPUT /usr/share/texlive/texmf-dist/tex/latex/enumitem/enumitem.sty
+INPUT /usr/share/texlive/texmf-dist/tex/latex/enumitem/enumitem.sty
 INPUT /usr/share/texlive/texmf-dist/tex/latex/todonotes/todonotes.sty
 INPUT /usr/share/texlive/texmf-dist/tex/latex/todonotes/todonotes.sty
 INPUT /usr/share/texlive/texmf-dist/tex/latex/base/ifthen.sty
@@ -290,6 +292,8 @@ INPUT /home/zhijie/Notes/Computer_Networking/chapters/chapter2/Recursive_queries
 INPUT /home/zhijie/Notes/Computer_Networking/chapters/chapter2/DNS_message_format.png
 INPUT /home/zhijie/Notes/Computer_Networking/chapters/chapter2/Distribution_time_forP2P.png
 INPUT /home/zhijie/Notes/Computer_Networking/chapters/chapter2/BitTorrent.png
+INPUT /home/zhijie/Notes/Computer_Networking/chapters/chapter2/circular_DHT.png
+INPUT /home/zhijie/Notes/Computer_Networking/chapters/chapter2/circular_DHT_shortcut.png
 INPUT /home/zhijie/Notes/Computer_Networking/main.aux
 INPUT /home/zhijie/Notes/Computer_Networking/main.out
 INPUT /home/zhijie/Notes/Computer_Networking/main.out

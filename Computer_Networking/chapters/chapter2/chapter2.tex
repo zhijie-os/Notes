@@ -942,10 +942,97 @@ it downloads chunks it also uploads chunks to other peers. Once a peer has
 acquired the entire file, it may leave the torrent, or (altruistically) remain
 in the torrent and continue to upload chunks to other peers. Also, any peer may leave
 the torrent at any time with only a subset of chunks, and later rejoin the torrent.\\
+
+
 Each torrent has an infrastructure node called a \tbi{tracker}.When a peer joins a torrent, it registers itself with the tracker and periodically
 informs the tracker that it is still in the torrent. In this manner, the tracker keeps
 track of the peers that are participating in the torrent.\\
 
-\insertImage{width=0.7\textwidth}{chapters/chapter2/BitTorrent.png}{File distribution with BitTorrent}{c2_bitTorrent}
+\insertImage{width=0.5\textwidth}{chapters/chapter2/BitTorrent.png}{File distribution with BitTorrent}{c2_bitTorrent}
 
+Say Alice joins the torrent, and the tracker randomly selects 50 peers and sender
+IP addresses of these 50 peers to Alice. Alice attempts to establish concurrent
+TCP connections with all peers on this list.\\
+
+\tbi{Neighboring Peers}: The peers with which Alice succeeds in establishing a TCP
+connection.\\
+
+As time evolves, some of these
+peers may leave and other peers may attempt to establish TCP
+connections with Alice. So a peer’s neighboring peers will fluctuate over time.\\
+
+\subsubsection{Some strategies that BitTorrent uses}
+
+
+\begin{description}[style=nextline]
+    \item[Q: "which chunks should she request first from her
+    neighbors?" and "which of her neighbors should she send requested
+    chunks?"] A: \tbi{Rarest first}: The idea is to equalize the numbers of copies of each chunk in the
+    torrent.
+    \item[Q: Which requests to respond to?] A: The basic idea is that gives priority to the neighbors that are 
+    currently supplying data at the highest rate. In particular, a requesting peer A measures the rate at which it
+    receives bits and determine the top four neighbors that are feeding her bits at the highest rate. Every 10 seconds, A recalculates the rates and possibly 
+    modifies the set of four peers. Importantly, every 30 seconds, \underline{A also picks one additional neighbor B
+    at random} and sends it chunks. Because A is feeding B data, A may become top four at B's list. B could also become one of the top Fortunately
+    peers in A's list. If the two peers are satisfied with the trading, they will put each
+    other in their top four lists and continue trading with each other until one of the peers
+    finds a better partner.The effect is that peers capable of uploading at compatible rates
+    tend to find each other. The random neighbor selection also allows new peers to get chunks, so that they can have something to trade. All other neighboring peers besides
+    these five peers (four “top” peers and one probing peer) are “choked,” that is, they do
+    not receive any chunks from Alice.
+\end{description}
+
+
+
+\subsection{Distributed Hash Tables (DHTs)}
+
+\hf It is very straightforward to build a database with client-server architecture that
+stores all the (key, value) pairs in one central server. Instead P2P version of this database
+that will store the (key, value) pairs over millions of peers. In the P2P system, each peer will only hold a
+small subset of the totality of the (key, value) pairs. Any peer can query to the distributed
+database with a particular key and any peer can insert new key-value pairs into the 
+database. Such a distributed database is called \tbi{distributed hash table}(DHT).\\
+
+\subsubsection{Several approches to build a DHT}
+
+
+   \hf \tbi{Approch 1}: Randomly scatter the (key,
+    value) pairs across all the peers and have each peer maintain a list of the IP
+    addresses of all participating peers. In this design, the querying peer sends its query
+    to all other peers, and the peers containing the (key, value) pairs that match the key
+    can respond with their matching pairs.\\
+    \tbi{Problem}: The design is completely unscalable (brute force every query). Potientially too much traffic in the network.\\
+    \newline
+
+    \utbi{Approch 2}:Assign an identifier to each peer, where each identifier is an integer in the range [0,
+    ,$2^n - 1$] for some fixed n. Given that each peer
+    has an integer identifier and that each key is also an integer in the same range, a natu-
+    ral approach is to assign each (key, value) pair to the peer whose identifier is the
+    closest to the key.\\
+    This approach is more elegant. To implement such a scheme, need to define what is meant by "closet"
+    for which many conventions are possible. => "closest successor of the key"\\
+    \newline
+
+
+    But who to determine the peer that is closest to the key? If A were to keep track of all the peers in the system (peer IDs and corresponding
+    IP addresses), A could locally determine the closest peer. But such an approach
+    requires each peer to keep track of all other peers in the DHT—which is completely
+    impractical for a large-scale system with millions of peers.
+
+
+    \subsection{Circular DHT}
+    
+    \hf In order for a peer to determine the peer that is closest to the key? Peers are organized into a circle. 
+    In this circular arrangement, each peer only keeps track of its immediate \tbi{successor} and immediate \tbi{predecessor} (modulo $2^n$)
+
+    \insertImage{width=0.4\textwidth}{chapters/chapter2/circular_DHT.png}{Peer 3 wants to determine who is
+    responsible for key 11.}{c2_circular_dht_example}
+
+
+    Some shortcuts can be added to speed up the query process.
+
+    \insertImage{width=0.3\textwidth}{chapters/chapter2/circular_DHT_shortcut.png}{Circular DHT with shortcuts}{c2_circular_dht_with_shortcuts}.
+
+
+\section{Socket Programming: Create Network Applications}
 
