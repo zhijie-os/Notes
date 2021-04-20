@@ -1,15 +1,108 @@
 \chapter{Overview}
 
 \section{Different views of operating system}
-    An abstract view of components of a computer system.
+   
+\hf An abstract view of components of a computer system.
 
 \insertImage{width=0.6\textwidth}{chapters/chapter1/abstract_view.png}{Abstract view of the components of a computer system.}{c1_abstract_view}
 
 \subsection{User view}
 
-Operating system is designed for \tbi{ease of use}, with some attention paid
+\hf Operating system is designed for \tbi{ease of use}, with some attention paid
 to performance and security and none attention paid to \tbi{resource utilization}
 -how various hardware and software resources are shared.
 
 \subsection{System view}
-The operating system is the program most intimately invo
+\hf The operating system is the program most intimately involved with the hardware. We can view
+an operating system as a \tbi{resource allocator}.\\
+
+A slightly different view of an operating system emphasizes the need to control the various
+I/O devices and user programs. Therefore, an operating system is a \tbi{control program}.
+
+\subsection{Defining Operation Systems}
+\hf A common definition: The operating system is the one program running at all times on the 
+computer --- usually called \tbi{kernel}. Along with the kernel, there are two other types of 
+programs: \tbi{system programs}, which are associated with the operating system but are not necessarily part of the kernel, and application programs, which include all programs
+not associated with the operation of the system.
+
+\section{Computer-System Organization}
+
+\hf A modern general-purpose computer system consists of one or more CPUs and
+a number of device controllers connected through a common \tbi{bus} that provides
+access between components and shared memory.
+
+\insertImage{width=0.7\textwidth}{chapters/chapter1/PC_computer_system.png}{A typical PC computer system}{c1_pc_computer_system}
+
+Typically, operating systems have a \tbi{device driver} for each device controller. This device
+driver \underline{understands the device controller and provides the rest of the operating system with a uniform interface to the device}. The CPU and the device controllers can tbi{execute in parallel}, competing for memory cycles. To ensure orderly access to the shared memory, a memory controller synchronizes access to the memory. 
+
+
+\subsection{Interrupts}
+
+\hf To start an I/O operation, the device driver loads the appropriate registers in the device
+controller. The device controller, in turn, examines the contents of these registers to determine what action to take. The controller starts the transfer of data from the device to its local buffer. Once the transfer of data is complete, the \underline{device controller informs the device driver} that it has finished its operation by issuing an \tbi{interrupt}.
+
+\subsubsection{Overview of Interrupt}
+
+\hf Hardware may trigger an interrupt at any time by sending a signal to the CPU, usually by way of the \tbi{system bus} (The system bus is the main communications path between the major components).\\
+
+\underline{Interrupts are a key part of how operating system and hardware interact.}
+
+
+\insertImage{width=0.9\textwidth}{chapters/chapter1/Interrupt_timeline_for_a_single_program.png}{Interrupt timeline for a single program doing output.}{c1_Interrupt_timeline}
+
+When the CPU is interrupted, commonly, it transfers control to the appropriate interrupt service routine. A generic routine is used to examine the interrupt information. The routine, in turn, would call the interrupt-specific handler.\\
+
+
+Interrupts need to be handled very qucickly, as they occur very frequently. \tbi{interrupt vetor}, which is a table of pointers to interrupt routine, is used to call interrupt routines indirectly. The interrupt architecture must also save the state information of whatever was interrupted, so that it can store this information after servicing the interrupt.
+
+\subsubsection{Implementation}
+
+\hf The CPU hardware has a wire called \tbi{interrupt-request line} that the CPU senses after executing every instruction. When the CPU detects that a controller has asserted a signal
+on the interrupt-quest line, it reads the interrupt number and jumps to the \tbi{interrupt-handler routine} by using that interrupt number as an index into the interrupt vector.
+
+\insertImage{width=0.7\textwidth}{chapters/chapter1/Interrupt_driven_IO_cycle.png}{Interrupt-driven I/O cycle.}{c1_Interrupt_IO_cycle}
+
+
+\tbi{More sophisticated interrupt-handling features needed}:
+\begin{enumerate}
+	\item Defer interrupt handling during critical processing.
+	\item Dispatch to the proper interrupt handler for a device.
+	\item Multilevel interrupts, so that operating system can distinguish between high- and low-priority interrupts and can respond  with the appropriate degree of urgency.
+\end{enumerate}
+
+
+\begin{center}
+Defer Interrupt handling during critical processing=>
+\end{center}
+
+\tbi{(1).}Most CPUs have two interrupt request lines:
+\begin{enumerate}
+	\item Nonmaskable interrupt: Reversed for events such as unrecoverable memory errors.
+	\item Maskable interrupt: Can be turned off before entering critical instruction sequences. It is used by device controller to request service.
+\end{enumerate}
+
+\insertImage{width=0.6\textwidth}{chapters/chapter1/Intel_processor_event_vector_table.png}{Intel processor event-vector table.}{c1_intel_interrupt_vector}
+
+
+\tbi{(2).}In practice, computers have more devices than they have address elements in the interrupt vector. A common way to solve this problem is to use \tbi{interrupt chaining}, in which each element in the interrupt vector points to the head of a list of interrupt handlers.
+
+
+\tbi{(3).}The interrupt mechanism also implements a system of \tbi{interrupt priority
+levels}. These levels enable the CPU to defer the handling of low-priority interrupts without masking all interrupts and makes it possible for a high-priority
+interrupt to preempt the execution of a low-priority interrupt.
+
+\subsection{Storage Structure}
+
+\hf \underline{The CPU can load instructions only from memory} $\Rightarrow$ Any programs must first be loaded into memory to run. 
+
+\begin{enumerate}
+	\item General-purpose computers run most of their programs from rewritable memory, called \tbi{main memory}(aka Random-acess memory or RAM). RAM is volatile (loss its content when pwoer off).
+	\item The first program to run on computer power-on is \tbi{bootstrap program}. Electrically erasable programmable read-only memory (EEPROM) or other forms of firmware is used for \tbi{bootstrap program} since EEPROM is nonvolatile.
+\end{enumerate}
+
+However, main memory is usually too small to store all needed data permanently and  it is volatile. Thus, most computer systems provide \tbi{secondary storage} as an extension of main memory in order to store large quantities of data permanently.\\
+
+The most common secondary-storage devices are \tbi{hard-disk drives (HDDs)} and \tbi{nonvolatile memory (NVM) devices}. Most programs are stored in secondary storage until they are loaded into the main memory.\\
+
+\tbi{Tertiary storage}: Large enough and slow enough memory devices. For example, cache memory, CD-ROM, magnetic tapes and so on. They are used for special purposes such as store backup copies of material.
