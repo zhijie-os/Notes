@@ -125,6 +125,27 @@ header for every message.\\
 
 \section{Connectionless Transport: UDP}
 
-\hf Basically, UDP pass application messages directly to the network layer after providing a multiplexing/demultiplexing service and some light error checking. UDP does just about as little as a transport protocol can do.
+\hf Basically, UDP pass application messages directly to the network layer after providing a multiplexing/demultiplexing service and some light error checking. UDP does just about as little as a transport protocol can do.\\
+
+\utbi{Why would one choose UDP rather than TCP?}\\
+
+\begin{enumerate}
+	\item Real-time applications cannot tolerate delay but can endure data loss.
+	\item Non-connection establishment: TCP connection-establishment delay is heavy.
+	\item No connection state: Can support many more active clients when the application runs over UDP rather than TCP.
+	\item Small packet header overhead: TCP only has 20 bytes of overhead. In comparison with TCP, UDP has much less header overhead --- 8 bytes of overhead.
+\end{enumerate}
+
+\utbi{Why UDP is not ideal sometimes?}
+
+\begin{enumerate}
+	\item UDP has no congestion control: lead to a heavy congested network.
+\end{enumerate}
+
+It is also possible for an application to have reliable data transfer when using UDP by building reliability into the application itself. But this is nontrivial task that would keep developers busy.  \underline{Just use TCP if you need reliability}.
 
 
+
+\subsection{UDP Segment Structure}
+
+\insertImage{width=0.45\textwidth}{chapters/chapter3/UDP_structure.png}{UDP Segment Structure}{c3_udp_segment_structure}
