@@ -1,111 +1,239 @@
-\chapter{Overview}
+\chapter{Virtualization}
 
-\section{Different views of operating system}
+\section{Segmentation And Paging}
+
+\subsection{Segmentation}
+
+    Segmentation is compiler's view about memory.
+
+    \includegraphics[width=0.45\textwidth]{chapters/chapter1/Segmentation_Paging/Segmentation.png}
+
+    In canonical address space, we have three logically-different segments:
+    \begin{enumerate}
+        \item Code/Text
+        \item Heap
+        \item Stack
+    \end{enumerate}
+
+\sssc{Base/Bound registers}
+    Each segments would have a pair of base and bound registers.
+
+    We would use base and bound/limit registers to translate address. 
+    
+    \begin{center}
+        Physical Address = Base Address + Offset
+    \end{center}
+
+    Bound register is used to check boundary. If offset is greater than
+    bound register value $\Rightarrow$ Segmentation fault.
+
+    \textit{Note: the stack grows in opposite direction}
+\sssc{Referring Segments}
+
+    We would chop up the address space into two parts:
+
+    \begin{enumerate}
+        \item 2 bits: indicate the segments
+        \item the reset: offset within the segments
+    \end{enumerate}
+
+    \includegraphics[width=0.45\textwidth]{chapters/chapter1/Segmentation_Paging/ReferingSegments.png}
+
+    Assume 8-bit address space in use:
+    \begin{enumerate}
+        \item 00xxxxxx: this is invalid, we would address 1/4 less because we don't use 00. 
+        \item 01xxxxxx: would be in the Code segment.
+        \item 10xxxxxx: would be in the Heap segment.
+        \item 11xxxxxx: would be in the Stack segment.
+    \end{enumerate}
+
+\sssc{Support for sharing}
+
+    It is good idea to share the code segment, but how the OS supports it?
+
+    There would be protection bits to indicate whether the segment can be used for.
+    
+    \includegraphics[width=0.45\textwidth]{chapters/chapter1/Segmentation_Paging/SegementWithProtection.png}
+
+\sssc{OS support}
+
+    So support segmentation, the OS
+    \begin{enumerate}
+        \item Context Switch: The segment registers must be saved and restored.
+        \item Support growth or shrinkage of a segment: Management of free space, Compacting physical memory and
+        Free-list management algorithms.
+    \end{enumerate}
+
+\subsection{Free Space Management}
+
+\sssc{Low-level Mechanisms}
+
+    Spliting and coalescing:
+
+\sssc{Basic Strategies}
+
+
+\subsection{Advanced Page Tables}
+
+
+\section{Swapping}
+
    
-\hf An abstract view of components of a computer system.
+\subsection{Swapping Mechanisms}
 
-\insertImage{width=0.6\textwidth}{chapters/chapter1/abstract_view.png}{Abstract view of the components of a computer system.}{c1_abstract_view}
+Use hard disk drive to stash portions of address spaces that currently aren't in
+great demand, so that we can support programs that take more memories than RAM has.
 
-\subsection{User view}
+\sssc{Swap Space}
 
-\hf Operating system is designed for \tbi{ease of use}, with some attention paid
-to performance and security and none attention paid to \tbi{resource utilization}
--how various hardware and software resources are shared.
+    Swap Space: Reserved space on the disk for moving pages back and forth.
 
-\subsection{System view}
-\hf The operating system is the program most intimately involved with the hardware. We can view
-an operating system as a \tbi{resource allocator}.\\
+    And OS can read from and write to swap space in page-sized units. Also OS needs
+    to know the exact address of the swap space inorder to quickly swap pages.
 
-A slightly different view of an operating system emphasizes the need to control the various
-I/O devices and user programs. Therefore, an operating system is a \tbi{control program}.
+\sssc{The Present Bit}  
 
-\subsection{Defining Operation Systems}
-\hf A common definition: The operating system is the one program running at all times on the 
-computer --- usually called \tbi{kernel}. Along with the kernel, there are two other types of 
-programs: \tbi{system programs}, which are associated with the operating system but are not necessarily part of the kernel, and application programs, which include all programs
-not associated with the operation of the system.
+    Inside of page table entry, there is a present bit.
 
-\section{Computer-System Organization}
+    When the present bit is set, that indicates the page is in the physical memory.
 
-\hf A modern general-purpose computer system consists of one or more CPUs and
-a number of device controllers connected through a common \tbi{bus} that provides
-access between components and shared memory.
+    It the present bit is off, the page in not in the memory. When a TLB miss resulting
+    in a page table entry and found the present bit is off, it is a page fault (indicates
+     the demanding page is not in the physical memory).
 
-\insertImage{width=0.7\textwidth}{chapters/chapter1/PC_computer_system.png}{A typical PC computer system}{c1_pc_computer_system}
+\sssc{The Page Fault}
 
-Typically, operating systems have a \tbi{device driver} for each device controller. This device
-driver \underline{understands the device controller and provides the rest of the operating system with a uniform interface to the device}. The CPU and the device controllers can tbi{execute in parallel}, competing for memory cycles. To ensure orderly access to the shared memory, a memory controller synchronizes access to the memory. 
+    The OS would invokes Page-Fault Handler to deal with page fault.
+    
+    \begin{enumerate}
+        \item The OS would look into PTE(page table entry) to find the address to fetch.
+        \item After completing disk I/O, the OS updates PTE to mark the page as present.
+        \item Update the PFN(physical frame number) of the PTE to the in-memory location
+        of the fetched-page.
+        \item Retry the instruction.
+    \end{enumerate}
+
+\sssc{When the memory is full}
+
+    When page-fault and the memory is full, the OS needs to kick out a page to place
+    a new page in. Therefore, page-replacement policy is needed.
+
+\subsection{Swapping Policies}
+
+\sssc{Cache Management}
+
+    Main memory holds some subset of all the pages of ongoing processes  $\Rightarrow$
+    main memory is a cache for virtual memory pages.
+
+    The goal is to minimize the number of cache misses.
+
+    \textbf{Average Memory Access Time}
+    \begin{equation*}
+        AMAT = T_M + (P_{miss}\times T_D)
+    \end{equation*}
+    Where,
+    \begin{enumerate}
+        \item $T_M$: the cost of accessing memory
+        \item $T_D$: the cost of accessing disk
+        \item $P_miss$: the probability of cache miss
+    \end{enumerate}
+
+    Assume that $T_M$ = 100 nanoseconds, $T_D$ = 10 milliseconds .
+    
+    If the hit rate is 0.9, the AMTA would be 100ns + 0.1 · 10ms = 1.0001 ms.
+
+    However, when the hit rate is 0.99, the AMTA would be 10.01 microsecs which is 
+    100x faster. That is, the perfomance is heavily based on the hit rate $\rightleftarrows$
+    swapping policy matters.
+
+\sssc{The Optimal Replacement Policy}
+
+    The optimal replacement policy leads to the fewest number of misses overall.
+
+    Belady (a person) showed that a simple policy that leads to optimal:
+    The page that would be accessed furthest in the future is the optimal policy
+    (This is very like shortest job first CPU scheduling,i.e, impossible!)
+
+    \includegraphics[width=0.45\textwidth]{chapters/chapter1/Segmentation_Paging/OptimalSwappingPolicy.png}
+
+    First three accesses are misses, and the misses are called \textbf{cold-start misses}.
+
+    When Access 3 at the first time, the optimal policy decides to evict 2 because
+    0 and 1 would be accessed before 2.
+
+    However, future is  unpredicable, an another approach is needed.
+
+\sssc{FIFO}
+
+    Old friend, First In First Out.
+
+    FIFO is very simple to implement.
+
+    \includegraphics[width=0.45\textwidth]{chapters/chapter1/Segmentation_Paging/FIFO.png}
+
+    FIFO could often do poorly because it cannot determine the importance of a page.
 
 
-\subsection{Interrupts}
+\sssc{Random}
 
-\hf To start an I/O operation, the device driver loads the appropriate registers in the device
-controller. The device controller, in turn, examines the contents of these registers to determine what action to take. The controller starts the transfer of data from the device to its local buffer. Once the transfer of data is complete, the \underline{device controller informs the device driver} that it has finished its operation by issuing an \tbi{interrupt}.
+    Simple to implement, and do well if the distribution of accessing page is uniform
+    distributed. However, it is unlikely for accessing page to follow a particular
+    distribtion.
 
-\subsubsection{Overview of Interrupt}
+    Random is better than FIFO, and a bit worst than optimal.
 
-\hf Hardware may trigger an interrupt at any time by sending a signal to the CPU, usually by way of the \tbi{system bus} (The system bus is the main communications path between the major components).\\
+\sssc{LRU}
 
-\underline{Interrupts are a key part of how operating system and hardware interact.}
+    If page is accessed in the near past, it is likely to be accesed in near future.
 
+    Some historically-based algorithms are used. LFU: Least-Frequently-Used, and
+    LRU: Least-Recently-Used.
 
-\insertImage{width=0.9\textwidth}{chapters/chapter1/Interrupt_timeline_for_a_single_program.png}{Interrupt timeline for a single program doing output.}{c1_Interrupt_timeline}
+    \includegraphics[width=0.45\textwidth]{chapters/chapter1/Segmentation_Paging/LRU.png}
 
-When the CPU is interrupted, commonly, it transfers control to the appropriate interrupt service routine. A generic routine is used to examine the interrupt information. The routine, in turn, would call the interrupt-specific handler.\\
+    The LRU policy works well to matching the optimal.
 
+\sssc{Implement Historical Algorithms}
 
-Interrupts need to be handled very qucickly, as they occur very frequently. \tbi{interrupt vetor}, which is a table of pointers to interrupt routine, is used to call interrupt routines indirectly. The interrupt architecture must also save the state information of whatever was interrupted, so that it can store this information after servicing the interrupt.
+    Using LRU, the system needs to count the least- and most-recently used which is 
+    a lot of work. Bad implementation would led heavy performance penalty.
 
-\subsubsection{Implementation}
+    Even adding timestamp for every process accessing, it is unlikely to scan the all
+    pages to find the abosulte least recently used page.
 
-\hf The CPU hardware has a wire called \tbi{interrupt-request line} that the CPU senses after executing every instruction. When the CPU detects that a controller has asserted a signal
-on the interrupt-quest line, it reads the interrupt number and jumps to the \tbi{interrupt-handler routine} by using that interrupt number as an index into the interrupt vector.
+    \tbi{Approximating LRU} would be a solution:
+    \begin{enumerate}
+        \item Need a \underline{use bit}: use bit is set to 1 when the page is accessed.
+        \item Use a clock algorithm: a clock pointer points to each particular page,
+        if the use bit is 1, the OS clear the use bit and the pointer points to the next page.
+        If found a page with use bit 0, replace it. The worst case is looping through the entire
+        set of pages for one circle.
+    \end{enumerate}
 
-\insertImage{width=0.7\textwidth}{chapters/chapter1/Interrupt_driven_IO_cycle.png}{Interrupt-driven I/O cycle.}{c1_Interrupt_IO_cycle}
+\sssc{Dirty Pages}
 
+    If a page is modified while in the memory, it is dirty. It would cost a lot to 
+    evict dirty page since the page must be written to the disk first. Therefore, 
+    most algorithms would favor to evict clean pages over dirty pages.
 
-\tbi{More sophisticated interrupt-handling features needed}:
-\begin{enumerate}
-	\item Defer interrupt handling during critical processing.
-	\item Dispatch to the proper interrupt handler for a device.
-	\item Multilevel interrupts, so that operating system can distinguish between high- and low-priority interrupts and can respond  with the appropriate degree of urgency.
-\end{enumerate}
+    To support the behavior, the hardware includes a \underline{modified bit}. The bit 
+    is set when the page is modified and cleared when written to disk.
 
+\sssc{Other Policies}
 
-\begin{center}
-Defer Interrupt handling during critical processing=>
-\end{center}
+    Page selection policy determines when to bring a page into the memory. For most 
+    pages, OS would use \tbi{demanding paging}, which means the OS brings the 
+    page into memory when it is accessed. Or OS would predict which page would be 
+    accessed in the future and bring it to the memory, this is called \tbi{prefetching}.
 
-\tbi{(1).}Most CPUs have two interrupt request lines:
-\begin{enumerate}
-	\item Nonmaskable interrupt: Reversed for events such as unrecoverable memory errors.
-	\item Maskable interrupt: Can be turned off before entering critical instruction sequences. It is used by device controller to request service.
-\end{enumerate}
+    Another policy determines how the OS writes pages out to disk.
+    \tbi{Clustering} is a behavior that OS buffers the changes and write out to disk
+    in one write.
 
-\insertImage{width=0.6\textwidth}{chapters/chapter1/Intel_processor_event_vector_table.png}{Intel processor event-vector table.}{c1_intel_interrupt_vector}
+\sssc{Thrashing}
 
+    \tbi{Thrashing}: When the demanding of pages exceed the available physical memory,
+    the system would constantly being paging.
 
-\tbi{(2).}In practice, computers have more devices than they have address elements in the interrupt vector. A common way to solve this problem is to use \tbi{interrupt chaining}, in which each element in the interrupt vector points to the head of a list of interrupt handlers.
-
-
-\tbi{(3).}The interrupt mechanism also implements a system of \tbi{interrupt priority
-levels}. These levels enable the CPU to defer the handling of low-priority interrupts without masking all interrupts and makes it possible for a high-priority
-interrupt to preempt the execution of a low-priority interrupt.
-
-\subsection{Storage Structure}
-
-\hf \underline{The CPU can load instructions only from memory} $\Rightarrow$ Any programs must first be loaded into memory to run. 
-
-\begin{enumerate}
-	\item General-purpose computers run most of their programs from rewritable memory, called \tbi{main memory}(aka Random-acess memory or RAM). RAM is volatile (loss its content when pwoer off).
-	\item The first program to run on computer power-on is \tbi{bootstrap program}. Electrically erasable programmable read-only memory (EEPROM) or other forms of firmware is used for \tbi{bootstrap program} since EEPROM is nonvolatile.
-\end{enumerate}
-
-However, main memory is usually too small to store all needed data permanently and  it is volatile. Thus, most computer systems provide \tbi{secondary storage} as an extension of main memory in order to store large quantities of data permanently.\\
-
-The most common secondary-storage devices are \tbi{hard-disk drives (HDDs)} and \tbi{nonvolatile memory (NVM) devices}. Most programs are stored in secondary storage until they are loaded into the main memory.\\
-
-\tbi{Tertiary storage}: Large enough and slow enough memory devices. For example, cache memory, CD-ROM, magnetic tapes and so on. They are used for special purposes such as store backup copies of material.\\
-
-\insertImage{width=0.7\textwidth}{chapters/chapter1/storage_device_hierarchy.png}{Storage Device Hierarchy}{c1_storage_device_hierarchy}
-
+    Linux would ran \tbi{out-of-memory killer} to choose some memory-intensive process
+    and kill them.
