@@ -5,7 +5,7 @@
 
 \subsection{Longest Palindromic Subseqence}
 
-\sssec{Problem Statment:}
+\sssc{Problem Statment:}
 
 Given a sequence, find the length of its Longest Palindromic Subsequence(LPS). 
 In a palindromic subsequence, elements
@@ -14,7 +14,7 @@ read the same backward and forward.
 A subsequence is a sequence that can be derived from another sequence by deleting some 
 or no elements without changing the order of the remaining elements.
 
-\sssec{Examples:}
+\sssc{Examples:}
 
     \textit{Input:} "abdbca"
     
@@ -29,7 +29,7 @@ or no elements without changing the order of the remaining elements.
     
     \textit{Explanation:} LPS is "ddd"
 
-\sssec{Basic Solution:}
+\sssc{Basic Solution:}
 
 A basic brute-force solution could be to try all the subsequences of the given sequence.
 We can start processing from the beginning and the end of the sequence. So at any step, we have two options:
@@ -39,7 +39,7 @@ We can start processing from the beginning and the end of the sequence. So at an
     \item If str[begin]!=str[end], nothing. Subproblem: max LPS in str[begin+1][end] and LPS in str[begin][end-1].
 \end{enumerate}
 
-\sssec{Bottom Up Idea:}
+\sssc{Bottom Up Idea:}
 
 
     n = string.length $\Rightarrow$ dp[n][n] and the subproblem is $dp[i][j]:$ the LPS in substring str[i:j].
@@ -60,7 +60,7 @@ We can start processing from the beginning and the end of the sequence. So at an
         \item From bottom to top.
     \end{enumerate}
 
-    \sssec{Bottom Up Code:}
+    \sssc{Bottom Up Code:}
 
 \begin{lstlisting}[language=C++,basicstyle=\tiny]
     class LPS{
@@ -101,14 +101,14 @@ We can start processing from the beginning and the end of the sequence. So at an
 
 \subsection{Longest Palindromic Substring:}
 
-\sssec{Problem Statment}
+\sssc{Problem Statment}
 
 
 Given a string, find the length of its Longest Palindromic Substring (LPS). 
 In a palindromic string, elements read the same backward and forward.
 
 
-\sssec{Examples:}
+\sssc{Examples:}
 
     \textit{Input:} "abdbca"
     

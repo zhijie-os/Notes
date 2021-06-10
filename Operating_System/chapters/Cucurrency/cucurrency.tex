@@ -302,9 +302,227 @@
 \sssc{Futex}
 
     A linux approach.... Kinda complicated, would take a look when studying linux.
+
     
+\ssc{Locked Data Structures}
+
+    We can use locks in some common data structures to make the structures thread safe.
+
+\sssc{Cucurrent Counters}
+
+    \includegraphics[width=0.5\textwidth]{chapters/Cucurrency/Cucurrency/current_counter.png}
+
+    The lock is acquired and released automatically as you call and return from object methods, like
+    a monitor.
+
+    However, this approach scales poorly.
+
+    \tbi{Approximate counters} works scablely. The idea is to give each thread a local counter, each thread 
+    updates on its local counter, and when the counter reaches the threshold. It acquire the global lock 
+    and accumulate its local counter to the global counter.
+
+\sssc{Concurrent Linked Lists}
+
+    \includegraphics[width=0.5\textwidth]{chapters/Cucurrency/Cucurrency/cucurrent_linkedlist.png}
+
+    However, this concurrent linked list is not scable.
+
+    \tbi{Hand-over-hand locking} : Instead of having a single lock for the entire list, add a lock per node
+    of the list. When traversing the list, the  code first grabs the next node's lock and then release the 
+    current node's lock.(Potientially Deadlock).  Also, practically it is hard to make such a structure faster
+    than the simple single lock approach, as the overheads of acquiring and releasing locks for each node is 
+    prohibitive.
+
+\sssc{Concurrent Queues}
+
+    It is always standard to add a big lock to entire structure.
+
+    Here is a more interesting concurrent queue designed by Michael and Scott: A lock for the head, and a lock for
+    the tail.
+
+    \includegraphics[width=0.5\textwidth]{chapters/Cucurrency/Cucurrency/concurrent_queue_init.png}
+    \includegraphics[width=0.5\textwidth]{chapters/Cucurrency/Cucurrency/concurrent_queue_operations.png}
+
+
+
+\sssc{Concurrent Hash}
+
+    A chaining hashtable is just an array of linked list. Since we have concurrent linked list,
+    we could just use concurrent linked list to construct a hashtable. No more work needed.
+
+    \includegraphics[width=0.5\textwidth]{chapters/Cucurrency/Cucurrency/concurrent_hashtable.png}
+
+
+\ssc{Conditional Variables}
+
+    There are many cases that we want to check whether a condition is true before continuing execute. 
+    For exmaple, a parent thread would like to wait its children to finish execution using pthread_join().
+
+    A global conditional variable can used, and parent spins to wait the the global variable become true.
+    However, we would like another approach that puts parent into sleep instead of spinning.
+
+\sssc{Definition and Routines}
+
+    A \tbi{condition variable} is an explict \tbi{queue} that threads can put themselves on 
+    when some condition, which is not as desired by waiting on the condition.
+
+    From my understanding, it a thread A is waiting for a state, it would put it into the queue that 
+    every thread in the queues wants the same state. Thread B can make the state happen, and then thread 
+    B would wake up one or more those threads in the queue, including A.
+
+\sssc{Syntax and Usage}
+
+    In pthread library, \tbi{$pthread cond_t$ name;} can be used to create condition variable. 
     
+    And a condition variable has two operations: \tbi{wait()} and \tbi{signal}.
+
+    \includegraphics[width=0.4\textwidth]{chapters/Cucurrency/Cucurrency/wait_signal.png}
+
+    \tbi{wait()} is like "Hey, I need something and put me into sleep until that thing is avaiable."
+
+    \tbi{signal()} is like "Ok, I make the thing you wanted, and I am going to wake you up."
+
+    Note that wait() takes a lock as second parameter, and that is because it assumes the lock 
+    is hold by the caller when calling wait() and it would release the lock and be put into sleep
+    (automically). The wait() won't return unless the lock is reacquired by the caller.
+
+    \includegraphics[width=0.65\textwidth]{chapters/Cucurrency/Cucurrency/thread_join_with_condition_variable.png}
+
+    But, why! Why! Why we need the state variable?
+
+    \includegraphics[width=0.6\textwidth]{chapters/Cucurrency/Cucurrency/importance_state_variable.png}
+
+    Imagine, child thread executes upon the creation. It would signal when the queue is empty and exit.
+    When the control is returned to the parent, parent would still call wait() and no one is going to 
+    wake it up. A \tbi{If} instead a \tbi{While} would probabily makes much sense. 
+
+    \tbi{TIP: Always Hold the Lock While Signaling}
+
+    \tbi{Mandatory: Hold the Lock While Calling Wait}.
+
+\sssc{Producer/Consumer (Bounded Buffer)}
+
+    Problem Statement: Producers generate data items and place them in the buffer; consumers grab said items 
+    from the buffer and consume them in some way.
+
+    \underline{A real would example: Web server; A producer puts HTTP requests into a work queue. 
+    While, the consumer threads
+    take request out of the queue and process them.}
+
+
+    \includegraphics[0.55\textwidth]{chapters/Cucurrency/Cucurrency/put_and_get.png}
     
+    We use int for simplicty. This buffer only has one slot for item. 
+    put() should set count to 1 when the slot is empty and get() should set count to 0 when the slot is filled.
+
+    \vspace*{5mm}
+
+    \tbi{A broken approach:}
+
+    \includegraphics[width=0.65\textwidth]{chapters/Cucurrency/Cucurrency/pc_broken.png}
+
+    This works only when there is exactly one producer and one consumer, since the condition variable is set 
+    in a way that producer and consumer take turns.
+    However, this is not useful anyway. Suppose there are two consumer c1,c2 and one producer p1.
+
+    Upon the creation of the c1, it runs and check the buffer is empty it waits. Then p1 runs and put item 
+    into the buffer and it call signal. Now c2 passed the if statement, and both c1,c2 call get().
+
+    You see here, the signal only tells at the moment the world is desired and you can wake up. But when 
+    waiting one wakes up, it could find the work has already changed once again, i.e, not desired.
+
+    \vspace*{5mm}
+    
+    \tbi{A "better" broken approach: use while instead of if}
+
+    \includegraphics[width=0.65\textwidth]{chapters/Cucurrency/Cucurrency/better_broken_pc.png}
+
+    This would address the issue in last approach, c1 and c2 can safely consume the product.
+    When c1 wakes up, it checks whether the world is desired again (because of while). 
+
+    This "always use while loops" is called \tbi{Mesa semantics}.
+
+    However, the above approach is still broken due to the nondeterministic signaling.
+
+    \begin{enumerate}
+        \item both c1 and c2 sleep when they find there is item in the buffer.
+        \item p1 puts the item in the buffer and signal one consumer to wake up, and go to sleep
+        \item assume c1 wakes up, and cosumed the one item.
+        \item c1 signals on the condition variable,and went to sleep.
+        \item c2 wakes up, and check the buffer is empty, back to sleep.
+        \item all p1,c1,c2 are sleeping
+    \end{enumerate}
+
+    This is due to there is one condition variable, and the signaling is nondeterministic. 
+    A consumer should never wakes up a consumer, and a producer should never wake up a 
+    producer.
+
+    \vspace*{5mm}
+
+    \tbi{Correct solution:}
+
+    Producer wakes up consumer, and consumer wakes producer. Thus, two condition variables needed.
+
+    \includegraphics[width=0.6\textwidth]{chapters/Cucurrency/Cucurrency/two_condition_variable_solution.png}
+
+    Note that two condition variables are in using: \tbi{empty} and \tbi{fill}, if is used to replace while in 
+    producer part.
+
+    When producer filled the buffer, it signals full "Hey, we have item in the buffer". And it waits for 
+    empty "Well, call me when the buffer is empty".
+
+    When consumer emptied the buffer, it signals empty "Hey, producer. The buffer is empty, please fill".
+    And it waits for full "Also, call me when it is filled, I need more".
+
+    \vspace*{5mm}
+
+    \tbi{General solution:}
+
+    We let producer produces multiple items when wakes up.
+    And let consumer consumes multiple items when wakes up.
+
+    With single pair of producer and consumer, this approach is more efficient as
+    it reduces context switches; with multiple prodcuers or consumers, it even allows
+    concurrent producing or consuming to take place.
+
+    \includegraphics[width=0.45\textwidth]{chapters/Cucurrency/Cucurrency/revised_get_and_put.png}
+    \includegraphics[width=0.50\textwidth]{chapters/Cucurrency/Cucurrency/revised_producer_consumer.png}
+
+\sssc{Covering Conditions}
+
+    \includegraphics[width=0.55\textwidth]{chapters/Cucurrency/Cucurrency/covering_conditions.png}
+
+    Problem Scenario:
+
+    There are two threads Ta,Tb. Ta asks for 10 bytes and Tb asks for 100 bytes. At the creations of Ta and 
+    Tb, there is 0 bytes free memory. Therefore Ta and Tb sleep. When Tf frees up 50 bytes, Tf signaled 
+    Tb which needs 100 bytes. Tb would sleep again, and no memory would be allocated even Ta's request 
+    can be fulfilled.\\
+
+    Solution: 
+
+    Instead of \textbf{$pthread_cond_signal()$}, we can use \textbf{$pthread_cond_broadcast$}.
+
+    However, the cost is very noticable since all threads would be waken up.
+    
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
