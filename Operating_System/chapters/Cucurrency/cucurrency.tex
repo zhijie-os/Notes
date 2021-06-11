@@ -5,15 +5,14 @@
     Thread: very much like process, except threads share the same address space and thus
     can access the same data.
 
-\ssc{Threads vs Processes}
 
-\sssc{Similarities between Processes and Threads}
+\ssc{Similarities between Processes and Threads}
 
     A thread has a program counter(PC), own set of registers. When switching from
     thread T1 to thread T2, a context switch must take place. There would be 
     thread control blocks (TCB) like PCB to store the state of each thread.
 
-\sssc{Difference between Processes and Threads}
+\ssc{Difference between Processes and Threads}
 
     1. The address space of threads within a single process is the same.
 
@@ -356,7 +355,7 @@
 \ssc{Conditional Variables}
 
     There are many cases that we want to check whether a condition is true before continuing execute. 
-    For exmaple, a parent thread would like to wait its children to finish execution using pthread_join().
+    For exmaple, a parent thread would like to wait its children to finish execution using $pthread_join()$.
 
     A global conditional variable can used, and parent spins to wait the the global variable become true.
     However, we would like another approach that puts parent into sleep instead of spinning.
@@ -410,7 +409,7 @@
     take request out of the queue and process them.}
 
 
-    \includegraphics[0.55\textwidth]{chapters/Cucurrency/Cucurrency/put_and_get.png}
+    \includegraphics[width=0.55\textwidth]{chapters/Cucurrency/Cucurrency/put_and_get.png}
     
     We use int for simplicty. This buffer only has one slot for item. 
     put() should set count to 1 when the slot is empty and get() should set count to 0 when the slot is filled.
@@ -488,7 +487,7 @@
     \includegraphics[width=0.45\textwidth]{chapters/Cucurrency/Cucurrency/revised_get_and_put.png}
     \includegraphics[width=0.50\textwidth]{chapters/Cucurrency/Cucurrency/revised_producer_consumer.png}
 
-\sssc{Covering Conditions}
+\sssc{Covering Conditions: Broadcast}
 
     \includegraphics[width=0.55\textwidth]{chapters/Cucurrency/Cucurrency/covering_conditions.png}
 
@@ -504,29 +503,243 @@
     Instead of \textbf{$pthread_cond_signal()$}, we can use \textbf{$pthread_cond_broadcast$}.
 
     However, the cost is very noticable since all threads would be waken up.
+
+
+\ssc{Semaphore}
+
+\sssc{Definition:}
     
+    A semaphore is an object with an integer value that we can manipulate with 
+    two routines; in POSIX, these routines are \tbi{$sem_wait()$} and
+     \tbi{$sem_post$}.
+
+    The initial value of the semaphore determines its behavior, it is necessary
+    to initialize the semaphore to some value.
+
+    \includegraphics[width=0.55\textwidth]{chapters/Cucurrency/Cucurrency/semaphore_init.png}
+
+    After initialize the semaphore, one can interact with it using \tbi{$sem_wait()$} and
+    \tbi{$sem_post$}.
+
+    \includegraphics[width=0.60\textwidth]{chapters/Cucurrency/Cucurrency/semaphore_routines.png}
+
+    \underline{\textbf{The value of the semaphore is equal to the number of,
+    when negative,waiting threads.}}
+
+    And the initial value is the number of resources that can be give away at start.
+\sssc{Binary Semaphore (Locks)}
+
+    \includegraphics[width=0.6\textwidth]{chapters/Cucurrency/Cucurrency/binary_semaphore.png}
+
+    This is essential just a lock, when semaphore is initialized to 1.
+
+    However, this is useless since the lock already serves the purpose.
+
+\sssc{Producer/Consumer (Bound Buffer):Semaphore approach}
+
+    Note that semaphore works like a combination of lock and condition variable.
+
+    \includegraphics[width=0.5\textwidth]{chapters/Cucurrency/Cucurrency/pc_semaphore_get_put.png}
+
+    \includegraphics[width=0.5\textwidth]{chapters/Cucurrency/Cucurrency/pc_semaphore.png}
+
+    However, there would be a race condition at the put() and get():
+    \begin{enumerate}
+        \item Pa gets to run get() first, it first puts item in slot i.
+        \item just before Pa increment the slot counter, it gets interrupted.
+        \item Pb still have slot counter at slot i, and Pb overwrites slot i.
+    \end{enumerate}
+
+    That is , there is no mutual exclusion for put() and get(), but only signaling
+    whether one can put or get.
+
+    \includegraphics[width=0.6\textwidth]{chapters/Cucurrency/Cucurrency/revised_pc_semaphore.png}
+
+    Now, the revised solution use semaphore (like a lock) to add mutual exclusion.
+
+    \underline{\textbf{However, it still doesn't work because deadlock since semaphore don't increament itself when sleep}} The consumers 
+    and producers share a single lock.
+
+    \begin{enumerate}
+        \item Consumer C1 runs first, the use sem-wait(\&mutex) to required the lock, mutex = 0.
+        \item C1 continue, and calls sem-wait(\&full), however there is no item in the 
+        slot. And C1 sleeps.
+        \item When any other producers or consumers try to do something, they don't have the lock,
+        any sem-wait(\$mutex) would decrease the mutex to negative value and sleeps forever.
+    \end{enumerate}
+
+    Now a truly working vision,
+    \includegraphics[width=0.5\textwidth]{chapters/Cucurrency/Cucurrency/true_revised_pc_semaphore.png}
+
+    \underline{\textbf{To resolve the deadlock, simply reduce the scope of lock at this case}}.
 
 
+\sssc{Reader-Writer Locks}
+
+    For concurrent list operations, we need to guarantee that no two insertion races,
+    but it is ok for multiple readers to lookup concurrently.
+
+    \textbf{reader-write lock}: The implementation is in reader-writer.cpp
+
+\sssc{Dining Philosophers}
+
+    Problem statement: 
+    There are five “philosophers” sitting around a table. 
+    Between each pair of philosophers is a single fork (and thus, five total). 
+    The philosophers each have times where they think and don’t need any forks, 
+    and times where they eat. In order to eat, a philosopher needs two forks, 
+    both the one on their left and the one on their right
+
+    \includegraphics[width=0.5\textwidth]{chapters/Cucurrency/Cucurrency/dining_philosophers.png}
+
+    Here is the behavior for a philosopher:
+
+    \includegraphics[width=0.5\textwidth]{chapters/Cucurrency/Cucurrency/dp_indiv.png}
+
+    Some help functions needed
+
+    \begin{lstlisting}
+        int left(int p){
+            return p;
+        }
+
+        int right(int p){
+            return (p+1)%5;
+        }
+    \end{lstlisting}
+
+    \textbf{Broken solution:}
+
+    \begin{lstlisting}
+        // potientially deadlock: if every philosopher grabs the left one
+        // that is, all threads makes to sem_wait(&forks[left(p)]) and no further
+        void get_forks(int p){
+            sem_wait(&forks[left(p)]);
+            sem_wait(&forks[right(p)]);
+        }
+
+        void put_forks(int p){
+            sem_post(&forks[left(p)]);
+            sem_post(&forks[right(p)]);
+        }
+    \end{lstlisting}
+
+    \includegraphics[width=0.5\textwidth]{chapters/Cucurrency/Cucurrency/dp_deadlock.png}
+
+    \textbf{Dijkstra solution: break the dependency}
+
+    Make one philosopher behaves different than other ones.
+
+    \begin{lstlisting}
+        void get_forks(int p){
+            // letting philosopher 4 behaves differently, there would be deadlock
+            // since there won't be a circle now.
+            if(p==4){
+                sem_wait(&forks[right(p)]);
+                sem_wait(&forks[left(p)]);
+            }else{
+                sem_wait(&forks[left(p)]);
+                sem_wait(&forks[right(p)]);
+            }
+        }
+    \end{lstlisting}
+
+\sssc{Thread Throttling}
+
+    How can a programmer prevent "too many" threads from doing something at once and 
+    bogging the system down?
+
+    Answer is \textbf{Throttling:} decide a threshold, use semaphore to limit the number of threads 
+    concurrently executing.
+
+\sssc{How implement semaphore}
+
+    \begin{lstlisting}
+        typedef struct Semaphore{
+            int value;
+            pthread_cond_t cond;
+            pthread_mutex_t lock;
+        }semaphore;
+
+        void sem_init(sem *s, int value){
+            s-> value = value;
+            cond_init(&s->cond);
+            mutex_init(&s->lock);
+        }
+
+        void sem_wait(sem *s){
+            pthread_mutex_lock(&s->lock);
+
+            // however, this value would never go negative
+            // easy to implement, linux's approach
+            while(s->value <=0){
+                pthread_cond_wait(&s->cond,&s->lock);
+            }
+            s->value = s->value - 1;
+            pthread_mutex_unlock(&s->lock);
+        }
+
+        void sem_post(sem *s){
+            pthread_mutex_lock(&s->lock);
+            s->value = s->value - 1;
+            pthread_cond_signal(&s-cond);
+            pthread_mutex_unlock(&s->lock);
+        }
+
+    \end{lstlisting}
 
 
+\ssc{Deadlock bugs}
+
+    \includegraphics[width=0.5\textwidth]{chapters/Cucurrency/Cucurrency/simple_deadlock.png}
+
+    \textbf{Four condtions} need to be hold for a deadlock to occur:
+
+    \begin{enumerate}
+        \item \textbf{Mutual exclusion:} Threads claim exclusive control of resources.
+        \item \textbf{Hold-and-wait:} Threads hold the resource and wait for other necessary resource, wont let go.
+        \item \textbf{No preemption:} Resources cannot be forcibly removed from the threads that are holding them.
+        \item \textbf{Circular wait:} There exists a circular chain of threads such that each threads holds one or more 
+        resources that are being requested by the next thread in the chain.
+    \end{enumerate}
+
+\sssc{Prevention}
+
+    Make one of the four condition false all the time to prevent deadlock. However,
+    this is not practical. 
+
+\sssc{Deadlock avoidance via Scheduling}
+
+    Instead of deadlock prevention, in some scenarios deadlock avoidance is preferable.
+    Avoidance requires some global knowledge of which locks various 
+    threads might grab during their execution, and subsequently,
+    schedules said threads in a way as to guarantee no deadlock can occur.
 
 
+    \includegraphics[width=0.3\textwidth]{chapters/Cucurrency/Cucurrency/schedule_avoid_1.png}
+
+    \includegraphics[width=0.3\textwidth]{chapters/Cucurrency/Cucurrency/good_schedule_1.png}
 
 
+    From the images, it is possible to schedule threads to avoid deadlock\\
+    \underline{\textbf{ if we need the resources that eac thread wants before hand}}.
 
+    \includegraphics[width=0.3\textwidth]{chapters/Cucurrency/Cucurrency/deadlock_avoid_2.png}
 
+    \includegraphics[width=0.3\textwidth]{chapters/Cucurrency/Cucurrency/schedule_2.png}
 
+    Also, the scheduler could procude length-considerable scheduling.
 
+    Thus, this approach can be only used in limited environment, for example,
+    in an embedded system where one has full knowledge of the entire
+    set of tasks must be run and the locks that they need.
 
+    Also, such approach can limit the degree of concurrency.
 
+\sssc{Detection And Recovery}
 
+    One strategy can allow deadlock to occur occasionally, and then take some 
+    action once it has been detected.
 
-
-
-
-
-
-
-
-
-
+    A deadlock detector runs periodically,
+     building a resource graph and checking it for cycles.

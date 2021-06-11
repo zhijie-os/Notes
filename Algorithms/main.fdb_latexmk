@@ -1,5 +1,5 @@
 # Fdb version 3
-["pdflatex"] 1623340633 "/home/zhijie/Notes/Algorithms/main.tex" "/home/zhijie/Notes/Algorithms/main.pdf" "main" 1623340635
+["pdflatex"] 1623340633 "/home/zhijie/Notes/Algorithms/main.tex" "/home/zhijie/Notes/Algorithms/main.pdf" "main" 1623381679
   "/home/zhijie/Notes/Algorithms/main.aux" 1623340635 3420 9f5a976808a893b4ded2e77b7de8a53f ""
   "/home/zhijie/Notes/Algorithms/main.tex" 1623136755 217 76036e7e3794676e094de8b9aef1d03d ""
   "/usr/share/texmf-dist/fonts/enc/dvips/cm-super/cm-super-ts1.enc" 1617738065 2900 1537cc8184ad1792082cd229ecc269f4 ""
@@ -183,7 +183,7 @@
   "/usr/share/texmf-dist/web2c/texmf.cnf" 1617738065 39911 2da6c67557ec033436fe5418a70a8a61 ""
   "/var/lib/texmf/fonts/map/pdftex/updmap/pdftex.map" 1622945697 336600 6f90c65e159aaf8faaa6ea56bf6655c4 ""
   "/var/lib/texmf/web2c/pdftex/pdflatex.fmt" 1622945439 2812671 48f137a8561ee2a3611cccb0e1b1ad17 ""
-  "contents/Advanced_Data_Structure/B_Tree/B_Tree.tex" 1623340631 11879 0e7d71b78200e6b32c1dd0b1ecbbde81 ""
+  "contents/Advanced_Data_Structure/B_Tree/B_Tree.tex" 1623381679 11879 0e7d71b78200e6b32c1dd0b1ecbbde81 ""
   "contents/Advanced_Data_Structure/B_Tree/Images/B_Tree_Height.png" 1623330988 90737 63416a6eefea4a1dce6c2e562bc2667f ""
   "contents/Advanced_Data_Structure/B_Tree/Images/B_tree_splitr.png" 1623334515 71990 57a5af54bc3a554ddb429eed9a0fa760 ""
   "contents/Advanced_Data_Structure/B_Tree/Images/case_abcd.png" 1623338726 194655 f2b571f8defdea79df2862ce8334f420 ""
@@ -201,10 +201,10 @@
   "settings/page.tex" 1623136755 611 ae8b970461b073b9905bc146af457e7d ""
   "settings/title.tex" 1623136755 1406 45414d17798657eda835e44e42161c7c ""
   (generated)
-  "main.toc"
-  "main.aux"
   "main.pdf"
-  "/home/zhijie/Notes/Algorithms/main.log"
+  "main.out"
+  "main.aux"
+  "main.toc"
   "main.log"
   "/home/zhijie/Notes/Algorithms/main.pdf"
-  "main.out"
+  "/home/zhijie/Notes/Algorithms/main.log"
