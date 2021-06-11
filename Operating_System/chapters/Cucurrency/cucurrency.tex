@@ -743,3 +743,122 @@
 
     A deadlock detector runs periodically,
      building a resource graph and checking it for cycles.
+
+\ssc{Event-Based Concurrency}
+
+    Why event-based concurrency:
+
+    \begin{enumerate}
+        \item Managing concurrency correctly in multi-threaded applications are challenging.
+        \item Multi-threaded application, the developer has little or no control over what is scheduled
+        at a given moment in time.
+    \end{enumerate}
+
+    Given the difficulty of building a general-purpose scheduler that works well in all cases for all workloads,
+    one cannot expect the scheduler schedule optimally everytime. Thus, we have \textbf{event-based concurrency}
+    to address the problem.
+
+\sssc{The basic idea: An Event Loop}
+
+    One can simply wait for something to occur; when it does, you check what type of event it 
+    is and do the small amount of work it requires, which may include issuing I/O requests,
+    or scheduling other events for future handling.
+
+    An example can be event-based server. Such applications are based around on an \textbf{event loop}.
+
+    \begin{lstlisting}
+        while(1){
+            events = getEvents();
+            for( each event in events){
+                processEvent(e); // event handler
+            }
+        }
+    \end{lstlisting}
+
+    When event handler processes an event, it is the only work being done. It is just like a scheduler
+    schedule the event. Thus, we can decide which event to handler next to take over control on which 
+    work should be scheduled next.
+
+    But how? How can the event-based server determines which events are taking place?
+
+\sssc{Important API: select() or poll()}
+
+    In most systems, an API either called select() or poll() system calls to receive events.
+
+    The API enables a program to check whether there is any incoming I/O that should be attended to.
+
+    \textbf{select()}
+
+    \begin{lstlisting}
+        int select( int nfds, 
+                    fd_set *restrict readfds,
+                    fd_set *restrict writefds, 
+                    fd_set *restrict errorfds,
+                    struct timeval *restrict timeout);
+    \end{lstlisting}
+
+    select() lets you check whether descriptors can be read from or written to.
+    The former lets a server determine that a new packet has arrived. The latter lets 
+    the service know when to reply(i.e, the outbound queue is not full).
+
+    Also, there is "timeout" interval. Common usage is to set it to NULL, so that select() would be blocked 
+    indefinitely, until a descriptor is ready; another common usage is to set it to 0, so that select()
+    return immediately.
+
+\sssc{Blocking vs Non-Blocking interfaces}
+
+    Blocking(synchronous) interfaces do all the work before returning to the caller; non-blocking(asynchronous)
+    interfaces begin some work but return immediately, and let the remaining work done in background.
+
+    Non-blocking interfaces are essential in the event-based approach.
+
+\sssc{Problem: Blocking System Calls}
+
+    There is one issue with event-based programming: issue blocking system call.
+
+    Without the nature of overlapping I/O and other computations that multi-threaded programming has,
+    event-based systems can only block until the call completes, i.e, no solution for the problem.
+
+    Thus, we make a rule for event-based systems : no blocking calls are allowed.
+
+\sssc{Asynchronous I/O}
+
+    To overcome the issue of blocking calls in event-based system, modern operating system have introduced 
+    new ways to issue I/O requests to the disk system, referred to generically as asynchronous I/O.
+
+    The interfaces allow issuing I/O request and return immediately. Additional interfaces are also 
+    avaiable for the system to decide whether an I/O request is fulfilled.
+
+    \begin{lstlisting}
+        struct aiocb { // AIO control block
+                  int             aio_fildes;    /* File descriptor */
+                  off_t           aio_offset;    /* File offset */
+                  volatile void  *aio_buf;       /* Location of buffer */
+                  size_t          aio_nbytes;    /* Length of transfer */
+                  int             aio_reqprio;   /* Request priority offset */
+                  struct sigevent aio_sigevent;  /* Signal number and value */
+                  int             aio_lio_opcode;/* Operation to be performed */
+              };
+
+        int aio_read(struct aiocb *aiocbp);
+
+        // check whether the request referred to by aiocbp has completed.
+        // If yes, 0 is returned; otherwise, EINPROGRESS is returned.
+        int aio_error(const struct aiocb *aiocbp);
+    \end{lstlisting}
+
+\sssc{Problem: State Management}
+
+    Another problem with event-based approach is that such code is commonly more complicated to write.
+    For example, when an event handler issues an asynchronous I/O, it must package up some 
+    program state for the next event handler to use when the I/O finally completes.
+    
+
+    
+
+
+
+
+
+
+
