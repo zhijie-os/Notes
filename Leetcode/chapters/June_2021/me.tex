@@ -1,0 +1,23 @@
+\chapter{June 2021}
+
+\section{Longest Palindromic Substring}
+
+    I solved this using dynamic programming.
+
+    Basic solution is that:
+    \begin{enumerate}
+        \item If str[i]==str[j], check whether str[i+1,j-1] is also palindrome.
+        \item If not, the longest palindrome could be in str[i+1,j] or str[i,j+1].
+    \end{enumerate}
+
+    If bottom-up, each cell dp[i][j] indicates whether str[i,j] is 
+    a palindrome. Deciding whether str[i,j] is palindrome needs 
+    deciding whether str[i+1,j+1] is palindrome first.
+
+\section{Container With most Water}
+
+    Given an array of height.
+
+    Find min(height[i],height[j])*(j-i) such that is maximum.
+    
+    
