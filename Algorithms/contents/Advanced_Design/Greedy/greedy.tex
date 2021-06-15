@@ -159,7 +159,139 @@
 
     \subsubsection*{Greedy-choice property}
 
+    A dynamic programming algorithm proceeds bottom up, whereas a greedy 
+    strategy usually process in a top-down fashion.
+    Of course, we must prove that a greedy choice at each step yields a globally
+    optimal solution.
+
+    \subsubsection*{Optimal substructure}
+
+    A problem is said to have optimal substructure 
+    if an optimal solution can be constructed from optimal solutions 
+    of its subproblems.
+
+    \subsubsection*{Dynamic Programming vs Greedy Algorithm}
+
+    0/1 knapsack problem vs fractional knapsack problem.
+
+    0/1 knapsack is actually a dynamic programming problem while 
+    fractional knapsack can be solved greedily.
+
+    \includegraphics[width=0.5\textwidth]{contents/Advanced_Design/Greedy/greedy_image/dp_vs_greedy.png}
+
+    fractional knapsack can be solved by computing the value per pound and 
+    ordering the value per pound in increasing order, and then apply 
+    greedy strategy to attain the global optimal.
+
+    However 0/1 knapsack cannot be solved by the above strategy, since 
+    picking item 10 make introduce unusable space left, therefore, lowering 
+    the actual value per pounds.
+
+
+\subsection{Huffman Codes}
+
+    Suppose there is 100,000-character data file that we wish 
+    to store compactly. We count the frequencey of each word.
+
+    \includegraphics[width=0.5\textwidth]{contents/Advanced_Design/Greedy/greedy_image/frequency_table.png}
+
+    Here, we use \textbf{binary character code} in which each character
+    is represented by a unique binary string, which we can
+    call \textbf{codeword}.
+
+    By considering the frequency of each character, a \textbf{variable-length code}
+    can do better than a fixed-length code which requires 300,000 bits.
+
+    From above table, the total number of bits that needed
+
+    \begin{equation*}
+        (45\cdot 1 + 13\cdot 3 + 12\cdot 3 +16\cdot 3 + 9\cdot 4 + 5\cdot 4) \cdot 1000 =  224,000 
+    \end{equation*}
+
+    \subsubsection*{Prefix codes}
+
+    Note, in the above codewords. No codeword is a prefix of some other codeword.
+
+    Prefix codes are desirable for decoding, chop each codeword then deal with 
+    the remaining. It is unambiguous. For example, 00101101 would be 
+    0-0-101-1101, that is \textbf{aabe}.
     
+    We use binary tree to represent for prefix code, so that we can easily pick 
+    off the initial codeword: "descend left" is 0, "descend right" is 1. An 
+    optimal code for a file is always represented by a full binary tree that is 
+    each nonleaf node has two children.
+
+    \includegraphics[width=0.7\textwidth]{contents/Advanced_Design/Greedy/greedy_image/prefix_code_trees.png}
+
+    If C is the alphabet, then the optimal prefix tree has |C| leaves. 1 leaf for 
+    each letter, and exacly |C|-1 internal nodes. Note that the value of the trees,
+    the tree is branched by the frequency of letters. 
+
+    Given an optimal prefix tree, we can easily compute the nubmer of 
+    required to encode a file. For each c in C, let c.freq denote the 
+    frequency of c and $d_{T}(c)$ denote the depth of c's leaf in the tree.
+    $d_{T}(c)$ is also the number of bits for the codeword of c.
+    \begin{equation*}
+        B(T) = \sum _{c\in C} c.freq\cdot d_{T}(c)
+    \end{equation*}
+
+\subsubsection*{Constructing a Huffman code}
+
+    Huffman invented a greedy algorithm that constructs an optimal preﬁx code called
+    a \textbf{Huffman code}.
+
+    Assume that C is a set of n characters and that each character $c\in C$
+    is an object with an attribute c.freq giving its frequency.
+
+    \begin{lstlisting}
+        HUFFMAN(C)
+        {
+            int n = |C|;
+            
+            /* Q is a min-priority queue, such that the key the frequency
+                also, for each c in the C is already a node.
+            */
+            Q = C;
+
+            for(int i=0; i<n-1;i++)
+            {
+                new node z;
+                
+                // extract the least two frequent node (letters)
+                // the order is arbitrary
+                x = EXTRACT-MIN(Q);
+                y = EXTRACT-MIN(Q);
+                z.left = x;
+                z.right = y;
+
+                // this is like merging two letters x,y into one "letter" z.
+                z.freq = x.freq + y.freq;
+                INSERT(Q.z);
+            }
+
+            // return the root
+            return EXTRACT-MIN(Q);
+        }
+    \end{lstlisting}
+
+    \textbf{Time complexity:} since Q is a priority queue,
+    the EXTRACT-MIN() takes O(lgn), and the for loops execute
+    exactly n-1 times. That is O(nlgn). By replacing the 
+    priority queue with van Emde Boas tree, we can further reduce 
+    the T(n) to O(nlglgn).
+
+\subsubsection*{Correctness of Huffman's algorithm}
+
+    To prove that the greedy algorithm H UFFMAN is correct, we show that the problem
+    of determining an optimal preﬁx code exhibits the greedy-choice and optimal-
+    substructure properties.
+
+    
+
+
+
+
+
 
 
 
