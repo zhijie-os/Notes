@@ -373,6 +373,7 @@
 
 
         // stores in the process's structure
+        // file table entry
         struct file {
             int ref;
             char readable;
@@ -389,12 +390,159 @@
     \end{lstlisting}
 
     
+    \sssc{Shared File Table Entries: fork() and dup()}
+
+    With fork () the child and parent share the same open file table entry,s
+    since they shared the same file descriptor.
+
+    \includegraphics[width=0.5\textwidth]{chapters/Persistence/persistence/share_open_file_table_entry.png}
+
+    Note that there is an \textbf{reference count} in the entry - refcnt.
+    When a file table entry is shared, its reference count is incremented,
+    only all processes close the file, the entry would be removed.
 
 
+    Also, there is \textbf{dup()} which allows a process to create a new file descriptor that refers 
+    to the same underlying open file as an existing descriptor. Basically copy the file descriptor.
 
 
+    \sssc{Writing Immediately with fsync()}
+
+    write() only tells the file system to write the data into disk sometimes in the future.
+    The system would buffer those writes in memory for perfomance reason.
+
+    For some systems, it is ideal to write data immediately. fsync() is such API that supports the 
+    functionality. The fsync() routine returns once all of these writes are complete.
+
+    \begin{lstlisting}
+        int fd = open("foo", O_CREAT|O_WRONLY|O_TRUNC,
+                S_IRUSR|S_IWUSR);
+                assert(fd > -1);
+                int rc = write(fd, buffer, size);
+                assert(rc == size);
+                rc = fsync(fd);
+                assert(rc == 0);
+    \end{lstlisting}
+
+    The above sequence doesn't guarantee everything that one might expected;
+    in some cases, it is required to fsync() the directory that contains foo.
+    Because foo might be the newly created file, without this additional 
+    fsync(), this might leading to \underline{application-level bugs}.
 
 
+    \sssc{Renaming Files}
+
+    \begin{lstlisting}
+        int fd = open("foo.txt.tmp", O_WRONLY|O_CREAT|O_TRUNC,
+                    S_IRUSR|S_IWUSR);
+                    write(fd, buffer, size); // write out new version of file
+                    fsync(fd);
+                    close(fd);
+
+                    // rename the file
+                    rename("foo.txt.tmp", "foo.txt");
+    \end{lstlisting}
+
+    First, rename() is automic call with respect to system crashes. If the system crashed,
+    it would either be renamed the old name or new name.
+
+    \sssc{Metadata of Files}
+
+    \begin{lstlisting}
+        struct stat {
+            dev_t     st_dev;     //ID of device containing file
+            ino_t     st_ino;     //inode number
+            mode_t    st_mode;    //protection
+            nlink_t   st_nlink;   //number of hard links 
+            uid_t     st_uid;     //user ID of owner
+            gid_t     st_gid;     //group ID of owner
+            dev_t     st_rdev;    //device ID (if special file)
+            off_t     st_size;    //total size, in bytes
+            blksize_t st_blksize; // blocksize for filesystem I/O
+            blkcnt_t  st_blocks;  // number of blocks allocated
+            time_t    st_atime;   //time of last access
+            time_t    st_mtime;   //time of last modification
+            time_t    st_ctime;   //time of last status change 
+        };
+    \end{lstlisting}
+
+    You should just think of an inode as a persistent data structure kept by the file system 
+    that has information like we see above inside of it. 
+
+    All inode reside on disk; a copy of active ones are usually cached in the memory to 
+    speed up access.
+
+    \sssc{Removing Files}
+
+        \textbf{unlink()} is the API to remove a file. But why doesn't it called remove() or delete().
+        
+    \sssc{Making Directories}
+        \textbf{mkdir}
+
+    \sssc{Reading and Deleting Directories}
+
+        \textbf{opendir(),readdir(),closedir()}.
+
+        For each directory entry in the readdir(dir).
+
+        \begin{lstlisting}
+            struct dirent {
+                char d_name[256];         // filename
+                ino_t d_ino;              // inode number
+                off_t d_off;              // offset to the next dirent
+                unsigned short d_reclen;  // length of this record
+                unsigned char  d_type;    // type of file
+            };
+        \end{lstlisting}
+
+        \textbf{rmdir()} has the requirment that the directory be empty.
+
+    \sssc{Hard Link}
+
+        \textbf{link()} creates another name in the directory you are creating the link to,
+        and refers it to the same inode number of the original file. It only gives you another 
+        file name that refers to the same file.
+
+        \textbf{unlink()} unlinks a file with the inode, and decrease the reference count(link count)
+        within the inode. When the reference count reaches zero does the file 
+        system also free the inode and related data blocks, and thus truly "deleted" the file.
+
+    \sssc{Symbolic Link}
+
+        Hard links are limited because you cannot create one to a directory.
+
+        Symbolic points to the pathname of file.
+
+    \sssc{Permission Bits and Access Control Lists}
+
+        Unix has the permission bits like "-rw-r--r--". (owner, group, other)
+
+
+        Access Control Lists specify a list of who can and cannot read a set of files.
+
+    \sssc{Making and Mounting a File System}
+
+    To make a file system, most file systems provide a tool, 
+    usually referred to as mkfs (pronounced “make fs”), that performs exactly this task.
+
+    
+    However, once such a file system is created, 
+    it needs to be made accessible within the uniform file-system tree. 
+    This task is achieved via the mount program 
+    (which makes the underlying system call mount() to do the real work). 
+    What mount does,
+    quite simply is take an existing directory as a target mount point 
+    and essentially paste a new file system onto the directory tree at that point.
+
+    \ssc{File System Implementation}
+
+        A unreal file system that services for introduction purpose: VSFS (very simple file system).
+
+        To understand a file system, think about two different aspects of them:
+        \begin{enumerate}
+            \item Data Structure
+            \item Access Method
+        \end{enumerate}
 
 
 
