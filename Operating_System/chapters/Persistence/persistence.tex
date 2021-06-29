@@ -540,13 +540,77 @@
 
         To understand a file system, think about two different aspects of them:
         \begin{enumerate}
-            \item Data Structure
-            \item Access Method
+            \item Data Structure: use arrays of blocks and other objects.
+            \item Access Method: open(), read() and write()
         \end{enumerate}
 
+    \includegraphics[width=0.65\textwidth]{chapters/Persistence/persistence/Overall_Organization.png}
+
+    \sssc{Blocks}
+
+        First, divide the disk into blocks. The commonly-used size is 4 KB.
+        Assume 64-bit block here.
+
+    \sssc{Data region}
+
+        The portion that actually stores the user data.
+
+    \sssc{Inodes(I)}
+
+        There is inode table such that lists all inodes in the filesystem.
+
+    \sssc{Allocation Structures}
+        
+     There is some way to track whether inodes or data blocks are free or allocated.
+    
+     \begin{enumerate}
+         \item free list 
+         \item bitmap: used in the graph
+     \end{enumerate}
 
 
+     \sssc{Superblock}
 
+        The superblock contains information about the particular file system,
+        including, for example, how many inodes and data blocks are in the 
+        file system.
+
+        When the system is mounted, the OS would read the superblock to initialize
+        various parameters, and then attach the volume to the file-system tree.
+    
+    \ssc{The Inode}
+
+     \textbf{INode} is short for \textbf{index node}, the historical name 
+     given to it in UNIX, and possibly earlier systems, used because these nodes
+     were originally arranged in an array, and the array indexed into
+     when accessing a particular inode.
+
+     Each inode is implicitly referred to by a number (called \textbf{i-number}),
+
+     \includegraphics[width=0.6\textwidth]{chapters/Persistence/persistence/inodes_organization.png}
+
+     Inside each inode is virtually all of the \textbf{metadata} you need about a file:
+     \begin{enumerate}
+         \item file type
+         \item file size
+         \item the number of blocks allocated to it 
+         \item protection information
+         \item timestamps (when the file was created, modified or last accessed)
+         \item the location on the disk
+     \end{enumerate}
+     
+     \includegraphics[width=0.6\textwidth]{chapters/Persistence/persistence/inode_ext2.png}
+
+     \sssc{Multi-level index}
+
+     The inode could contains \textbf{direct pointers} to the data blocks. However, this 
+     approach is very limited since the file could be very large, and it requires 
+     a gigantic table of direct pointers to refer it.
+
+     To resolve this, \textbf{indirect pointers}(a pointer to a table of pointers) are used to implement multi-level 
+     indexing. 
+
+     \includegraphics[width=0.6\textwidth]{chapters/Persistence/persistence/multi_level_index.png}
 
 
 
